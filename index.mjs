@@ -6,7 +6,7 @@ import chalk from 'chalk'
 import inquirer from 'inquirer'
 
 function checkRepoChanges () {
-  return execSync('git diff-index HEAD --').toString()
+  return execSync('git diff-index HEAD --').toString().length
 }
 
 function logger (color, message) {
@@ -34,10 +34,6 @@ function npm (command) {
 function git (command) {
   toolCommand('git', command)
 }
-
-console.log('diff', checkRepoChanges().length)
-
-throw Error('test')
 
 const branches = execSync('git branch')
   .toString()
