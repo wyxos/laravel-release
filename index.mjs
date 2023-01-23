@@ -116,6 +116,10 @@ if (files.length) {
 
 npm('run lint')
 
+await new Promise((resolve, reject) => {
+  setTimeout(resolve, 1000)
+})
+
 if(checkRepoChanges()){
   git('add .')
 
