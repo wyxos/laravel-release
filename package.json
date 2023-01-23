@@ -5,6 +5,7 @@
   "main": "index.mjs",
   "type": "module",
   "scripts": {
+    "start": "node .",
     "release": "node release.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
