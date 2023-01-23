@@ -152,11 +152,11 @@ const message = `feat: release ${tagVersion}`
 
 // commit with release message
 
-if(checkRepoChanges()){
-  git('add .')
+git('add .')
 
-  git(`commit -m "${message}"`)
-}
+git(`commit -m "${message}"`)
+
+git('push')
 
 if(javascriptChange){
   npm('run build')
