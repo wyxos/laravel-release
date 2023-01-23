@@ -35,7 +35,7 @@ function git (command) {
   toolCommand('git', command)
 }
 
-console.log('diff', checkRepoChanges())
+console.log('diff', checkRepoChanges().length)
 
 throw Error('test')
 
