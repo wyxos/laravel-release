@@ -212,7 +212,7 @@ if (!fs.existsSync(sshConfigPath)) {
   const { cwd } = await inquirer.prompt({
     type: 'input',
     name: 'cwd',
-    message: 'SSH private key location?',
+    message: 'Project location on server?',
     default () {
       return '/home/runcloud/webapps/my-app'
     }
