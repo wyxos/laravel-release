@@ -35,6 +35,10 @@ function git (command) {
   toolCommand('git', command)
 }
 
+console.log('diff', checkRepoChanges())
+
+throw Error('test')
+
 const branches = execSync('git branch')
   .toString()
   .split(/\n/)
@@ -49,13 +53,13 @@ const { releaseRepo } = await inquirer.prompt({
   name: 'releaseRepo',
   type: 'list',
   choices: branches,
-  message: 'Which repository to release?'
+  message: 'Which branch to release?'
 })
 
 const { updatedRepo } = await inquirer.prompt({
   name: 'updatedRepo',
   type: 'list',
-  message: 'Which repository to merge from?',
+  message: 'Which branch to merge from?',
   choices: branches.filter(value => value !== releaseRepo)
 })
 
