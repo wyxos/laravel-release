@@ -91,7 +91,7 @@ if(untrackedFiles || uncommittedFiles){
   git('push')
 }
 
-const files = execSync('git diff --name-only origin/master master').toString()
+const files = execSync(`git diff --name-only origin/${updatedRepo} ${updatedRepo}`).toString()
 
 let databaseChange = 0
 
