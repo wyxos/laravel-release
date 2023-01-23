@@ -87,8 +87,6 @@ if(untrackedFiles || uncommittedFiles){
   git('add .')
 
   git(`commit -m "${message}"`)
-
-  git('push')
 }
 
 const files = execSync(`git diff --name-only origin/${updatedRepo} ${updatedRepo}`).toString()
@@ -121,8 +119,6 @@ if(checkRepoChanges()){
 
   if(checkRepoChanges()){
     git(`commit -m "lint"`)
-
-    git('push')
   }
 }
 
@@ -160,8 +156,6 @@ if(checkRepoChanges()){
   git('add .')
 
   git(`commit -m "${message}"`)
-
-  git('push')
 }
 
 if(javascriptChange){
