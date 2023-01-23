@@ -2,8 +2,10 @@
   "name": "@wyxos/laravel-release",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.mjs",
+  "type": "module",
   "scripts": {
+    "release": "node release.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,5 +15,8 @@
     "chalk": "^5.2.0",
     "inquirer": "^9.1.4",
     "node-ssh": "^13.0.1"
+  },
+  "bin": {
+    "laravel-setup": "./index.mjs"
   }
 }
