@@ -17,6 +17,6 @@
     "node-ssh": "^13.0.1"
   },
   "bin": {
-    "laravel-setup": "./index.mjs"
+    "laravel-release": "./index.mjs"
   }
 }
