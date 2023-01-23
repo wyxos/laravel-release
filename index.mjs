@@ -6,7 +6,13 @@ import chalk from 'chalk'
 import inquirer from 'inquirer'
 
 function checkRepoChanges () {
-  return execSync('git diff-index HEAD --').toString().length
+  info('checking repo changes')
+
+  const output = execSync('git diff-index HEAD --').toString().length
+
+  info(`output from repo changes check: ${output}`)
+
+  return output
 }
 
 function logger (color, message) {
