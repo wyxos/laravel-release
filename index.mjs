@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { execSync } from 'child_process'
 import { NodeSSH } from 'node-ssh'
 import * as fs from 'fs'
