@@ -260,18 +260,30 @@ await projectCommand('git pull')
 if(composerChange){
   await projectCommand('composer update')
 }
+else{
+  info('no composer changes found.')
+}
 
 if(databaseChange){
   await projectCommand('php artisan migrate --force')
+}
+else{
+  info('no database changes found.')
 }
 
 // execute npm i && npm run build
 if(nodeChange){
   await projectCommand('npm i')
 }
+else{
+  info('no node dependency changes found.')
+}
 
 if(javascriptChange){
   await projectCommand('npm run build')
+}
+else{
+  info('no front end changes found.')
 }
 
 ssh.dispose()
