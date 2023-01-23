@@ -116,16 +116,14 @@ if (files.length) {
 
 npm('run lint')
 
-await new Promise((resolve, reject) => {
-  setTimeout(resolve, 1000)
-})
-
 if(checkRepoChanges()){
   git('add .')
 
-  git(`commit -m "lint"`)
+  if(checkRepoChanges()){
+    git(`commit -m "lint"`)
 
-  git('push')
+    git('push')
+  }
 }
 
 // change version of package.json
