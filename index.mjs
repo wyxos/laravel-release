@@ -252,7 +252,7 @@ async function projectCommand (command) {
 await projectCommand('git pull')
 
 if(composerChange){
-  await projectCommand('composer install')
+  await projectCommand('composer update')
 }
 
 if(databaseChange){
