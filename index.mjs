@@ -67,6 +67,8 @@ const { updatedRepo } = await inquirer.prompt({
 
 git(`checkout ${updatedRepo}`)
 
+git('pull')
+
 // check file not committed
 // if file(s) not committed: request for message to stage files
 // if file(s) committed: proceed
