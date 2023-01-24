@@ -89,7 +89,7 @@ if(untrackedFiles || uncommittedFiles){
   git(`commit -m "${message}"`)
 }
 
-const files = execSync(`git diff --name-only origin/${updatedRepo} ${updatedRepo}`).toString()
+const files = execSync(`git diff --name-only origin/${releaseRepo} ${updatedRepo}`).toString()
 
 let databaseChange = 0
 
@@ -205,7 +205,7 @@ if (!fs.existsSync(sshConfigPath)) {
     name: 'privateKeyPath',
     message: 'SSH private key location?',
     default () {
-      return 'C:\\Users\\joeyj\\.ssh\\id_rsa_wyxos'
+      return 'C:\\Users\\your-user-name\\.ssh\\id_rsa'
     }
   })
 
