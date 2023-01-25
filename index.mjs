@@ -93,6 +93,8 @@ if(untrackedFiles || uncommittedFiles){
 
 const files = execSync(`git diff --name-only origin/${releaseRepo} ${updatedRepo}`).toString()
 
+let phpChanges = 0
+
 let databaseChange = 0
 
 let composerChange = 0
@@ -104,6 +106,10 @@ let javascriptChange = 0
 
 if (files.length) {
   const items = files.split(/\n/).filter(Boolean)
+
+  // phpChanges = items.filter(value => value.indexOf('migrations') > -1).length
+  //
+  // info('php changes detected')
 
   databaseChange = items.filter(value => value.indexOf('migrations') > -1).length
 
@@ -117,7 +123,7 @@ if (files.length) {
 
   info('package.json changes detected')
 
-  javascriptChange = items.filter(value => /\.(js|vue|mjs|css|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length
+  javascriptChange = items.filter(value => /\.(js|vue|mjs|css|scss|pcss|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length
 }
 
 npm('run lint')
