@@ -50,7 +50,6 @@ const branches = execSync('git branch')
     .replace(/\s/g, '')
   )
 
-/** TODO merge updates from a repo to another */
 const { releaseRepo } = await inquirer.prompt({
   name: 'releaseRepo',
   type: 'list',
@@ -68,6 +67,24 @@ const { updatedRepo } = await inquirer.prompt({
 git(`checkout ${updatedRepo}`)
 
 git('pull')
+
+const gitIgnore = fs.readFileSync('.gitignore').toString()
+
+const doesIgnoreContainConfig = gitIgnore.indexOf('ssh-config.json') > -1
+
+if(!doesIgnoreContainConfig){
+  info('including ssh-config.json in .gitignore')
+  fs.appendFileSync('.gitignore', 'ssh-config.json')
+}
+
+const packageJson = JSON.parse(fs.readFileSync('package.json').toString())
+
+if(!packageJson.scripts.release){
+  info('adding "release" to package.json scripts')
+  packageJson.scripts.release = "npx wyxos/laravel-release"
+}
+
+fs.writeFileSync('package.json', JSON.stringify(packageJson))
 
 // check file not committed
 // if file(s) not committed: request for message to stage files
