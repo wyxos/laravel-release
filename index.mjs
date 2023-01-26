@@ -130,17 +130,19 @@ if (files.length) {
 
   databaseChange = items.filter(value => value.indexOf('migrations') > -1).length
 
-  info('migration changes detected')
+  info(databaseChange ? 'migration changes detected' : 'no migration changes detected')
 
   composerChange = items.filter(value => value.indexOf('composer.json') > -1).length
 
-  info('composer.json changes detected')
+  info(composerChange ? 'composer.json changes detected' : 'no composer.json changes detected')
 
   nodeChange = items.filter(value => value.indexOf('package.json') > -1).length
 
-  info('package.json changes detected')
+  info(nodeChange ? 'package.json changes detected' : 'no package.json changes detected')
 
   javascriptChange = items.filter(value => /\.(js|vue|mjs|css|scss|pcss|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length
+
+  info(javascriptChange ? 'front-end changes detected' : 'no front-end changes detected')
 }
 
 npm('run lint')
