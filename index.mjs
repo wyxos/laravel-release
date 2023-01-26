@@ -82,9 +82,9 @@ const packageJson = JSON.parse(fs.readFileSync('package.json').toString())
 if(!packageJson.scripts.release){
   info('adding "release" to package.json scripts')
   packageJson.scripts.release = "npx wyxos/laravel-release"
-}
 
-fs.writeFileSync('package.json', JSON.stringify(packageJson))
+  fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2))
+}
 
 // check file not committed
 // if file(s) not committed: request for message to stage files
