@@ -72,16 +72,16 @@ const gitIgnore = fs.readFileSync('.gitignore').toString()
 
 const doesIgnoreContainConfig = gitIgnore.indexOf('ssh-config.json') > -1
 
-if(!doesIgnoreContainConfig){
+if (!doesIgnoreContainConfig) {
   info('including ssh-config.json in .gitignore')
   fs.appendFileSync('.gitignore', 'ssh-config.json')
 }
 
 const packageJson = JSON.parse(fs.readFileSync('package.json').toString())
 
-if(!packageJson.scripts.release){
+if (!packageJson.scripts.release) {
   info('adding "release" to package.json scripts')
-  packageJson.scripts.release = "npx wyxos/laravel-release"
+  packageJson.scripts.release = 'npx wyxos/laravel-release'
 
   fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2))
 }
@@ -94,11 +94,11 @@ const untrackedFiles = execSync('git ls-files --other --exclude-standard').toStr
 
 const uncommittedFiles = checkRepoChanges()
 
-if(untrackedFiles || uncommittedFiles){
-  const {message} = await inquirer.prompt({
+if (untrackedFiles || uncommittedFiles) {
+  const { message } = await inquirer.prompt({
     name: 'message',
     message: 'There are untracked/uncommitted files. Provide a commit message',
-    default(){
+    default () {
       return 'feat: pre-release'
     }
   })
@@ -119,7 +119,6 @@ let composerChange = 0
 let nodeChange = 0
 
 let javascriptChange = 0
-
 
 if (files.length) {
   const items = files.split(/\n/).filter(Boolean)
@@ -147,10 +146,10 @@ if (files.length) {
 
 npm('run lint')
 
-if(checkRepoChanges()){
+if (checkRepoChanges()) {
   git('add .')
 
-  if(checkRepoChanges()){
+  if (checkRepoChanges()) {
     git(`commit -m "lint"`)
   }
 }
@@ -191,7 +190,7 @@ git(`commit -m "${message}"`)
 
 git('push')
 
-if(javascriptChange){
+if (javascriptChange) {
   npm('run build')
 }
 
@@ -209,6 +208,15 @@ const sshConfigPath = 'ssh-config.json'
 
 if (!fs.existsSync(sshConfigPath)) {
   // asks for environment, suggest development
+  const { environment } = await inquirer.prompt({
+    type: 'input',
+    name: 'environment',
+    message: 'Environment for the config?',
+    default () {
+      return 'development'
+    }
+  })
+
   const { host } = await inquirer.prompt({
     type: 'input',
     name: 'host',
@@ -246,7 +254,7 @@ if (!fs.existsSync(sshConfigPath)) {
   })
 
   const sshConfigJson = {
-    development: {
+    [environment]: {
       host,
       username,
       privateKeyPath,
@@ -263,7 +271,68 @@ const sshConfig = JSON.parse(fs.readFileSync(sshConfigPath).toString())
 
 const ssh = new NodeSSH()
 
-const { host, privateKeyPath, username, cwd } = sshConfig.development
+const { environment } = await inquirer.prompt({
+  name: 'environment',
+  message: 'Environment config to use for SSH?',
+  default () {
+    return 'development'
+  }
+})
+
+if(!sshConfig[environment]){
+  // generate and save config
+  const { host } = await inquirer.prompt({
+    type: 'input',
+    name: 'host',
+    message: 'SSH host/IP?',
+    default () {
+      return '192.168.100.10'
+    }
+  })
+
+  const { username } = await inquirer.prompt({
+    type: 'input',
+    name: 'username',
+    message: 'SSH with username?',
+    default () {
+      return 'runcloud'
+    }
+  })
+
+  const { privateKeyPath } = await inquirer.prompt({
+    type: 'input',
+    name: 'privateKeyPath',
+    message: 'SSH private key location?',
+    default () {
+      return 'C:\\Users\\your-user-name\\.ssh\\id_rsa'
+    }
+  })
+
+  const { cwd } = await inquirer.prompt({
+    type: 'input',
+    name: 'cwd',
+    message: 'Project location on server?',
+    default () {
+      return '/home/runcloud/webapps/my-app'
+    }
+  })
+
+  const sshConfigJson = {
+    ...sshConfig,
+    [environment]: {
+      host,
+      username,
+      privateKeyPath,
+      cwd
+    }
+  }
+
+  info('Updated ssh-config.json')
+
+  fs.writeFileSync(sshConfigPath, JSON.stringify(sshConfigJson, null, 2))
+}
+
+const { host, privateKeyPath, username, cwd } = sshConfig[environment]
 
 await ssh.connect({
   host,
@@ -284,32 +353,28 @@ async function projectCommand (command) {
 
 await projectCommand('git pull')
 
-if(composerChange){
+if (composerChange) {
   await projectCommand('composer update')
-}
-else{
+} else {
   info('no composer changes found.')
 }
 
-if(databaseChange){
+if (databaseChange) {
   await projectCommand('php artisan migrate --force')
-}
-else{
+} else {
   info('no database changes found.')
 }
 
 // execute npm i && npm run build
-if(nodeChange){
+if (nodeChange) {
   await projectCommand('npm i')
-}
-else{
+} else {
   info('no node dependency changes found.')
 }
 
-if(javascriptChange){
+if (javascriptChange) {
   await projectCommand('npm run build')
-}
-else{
+} else {
   info('no front end changes found.')
 }
 
