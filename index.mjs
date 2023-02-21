@@ -267,7 +267,7 @@ if (!fs.existsSync(sshConfigPath)) {
   fs.writeFileSync(sshConfigPath, JSON.stringify(sshConfigJson, null, 2))
 }
 
-const sshConfig = JSON.parse(fs.readFileSync(sshConfigPath).toString())
+let sshConfig = JSON.parse(fs.readFileSync(sshConfigPath).toString())
 
 const ssh = new NodeSSH()
 
@@ -317,7 +317,7 @@ if(!sshConfig[environment]){
     }
   })
 
-  const sshConfigJson = {
+  sshConfig = {
     ...sshConfig,
     [environment]: {
       host,
@@ -329,7 +329,7 @@ if(!sshConfig[environment]){
 
   info('Updated ssh-config.json')
 
-  fs.writeFileSync(sshConfigPath, JSON.stringify(sshConfigJson, null, 2))
+  fs.writeFileSync(sshConfigPath, JSON.stringify(sshConfig, null, 2))
 }
 
 const { host, privateKeyPath, username, cwd } = sshConfig[environment]
