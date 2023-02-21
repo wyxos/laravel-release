@@ -354,7 +354,7 @@ async function projectCommand (command) {
 await projectCommand('git pull')
 
 if (composerChange) {
-  await projectCommand('composer update')
+  await projectCommand('composer update --no-dev')
 } else {
   info('no composer changes found.')
 }
