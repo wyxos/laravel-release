@@ -195,7 +195,9 @@ if(javascriptChange){
 if(checkRepoChanges()){
   const files = execSync(`git diff --name-only origin/${updatedRepo} ${updatedRepo}`).toString()
 
-  if(files.length && files.filter(value => /\.(js|vue|mjs|css|scss|pcss|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length){
+  const items = files.split(/\n/).filter(Boolean)
+
+  if(items.length && items.filter(value => /\.(js|vue|mjs|css|scss|pcss|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length){
     git('push')
   }
 }
