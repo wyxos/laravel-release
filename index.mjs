@@ -155,53 +155,44 @@ if (checkRepoChanges()) {
 }
 
 // change version of package.json
-if(javascriptChange){
-  const json = JSON.parse(fs.readFileSync('./package.json').toString())
+const json = JSON.parse(fs.readFileSync('./package.json').toString())
 
-  const currentVersion = json.version || '1.0.0'
+const currentVersion = json.version || '1.0.0'
 
-  let defaultVersion = currentVersion.split('.')
+let defaultVersion = currentVersion.split('.')
 
-  defaultVersion[defaultVersion.length - 1] =
-    Number(defaultVersion[defaultVersion.length - 1]) + 1
+defaultVersion[defaultVersion.length - 1] =
+  Number(defaultVersion[defaultVersion.length - 1]) + 1
 
-  defaultVersion = defaultVersion.join('.')
+defaultVersion = defaultVersion.join('.')
 
-  const { version } = await inquirer.prompt([
-    {
-      name: 'version',
-      message: `Enter the version to publish (current ${currentVersion})`,
-      default: defaultVersion
-    }
-  ])
+const { version } = await inquirer.prompt([
+  {
+    name: 'version',
+    message: `Enter the version to publish (current ${currentVersion})`,
+    default: defaultVersion
+  }
+])
 
-  json.version = version
+json.version = version
 
-  fs.writeFileSync('./package.json', JSON.stringify(json, null, 2))
+fs.writeFileSync('./package.json', JSON.stringify(json, null, 2))
 
-  const tagVersion = `v${version}`
+const tagVersion = `v${version}`
 
-  const message = `feat: release ${tagVersion}`
+const message = `feat: release ${tagVersion}`
 
 // commit with release message
 
-  git('add .')
+git('add .')
 
-  git(`commit -m "${message}"`)
+git(`commit -m "${message}"`)
 
-  npm('run build')
-}
+npm('run build')
 
-if(checkRepoChanges()){
-  const files = execSync(`git diff --name-only origin/${updatedRepo} ${updatedRepo}`).toString()
+git('push')
 
-  const items = files.split(/\n/).filter(Boolean)
-
-  if(items.length && items.filter(value => /\.(js|vue|mjs|css|scss|pcss|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length){
-    git('push')
-  }
-}
-
+// update repo to release
 git(`checkout ${releaseRepo}`)
 
 git('pull')
