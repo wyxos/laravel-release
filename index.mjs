@@ -2,10 +2,10 @@
 import { execSync } from 'child_process'
 import { NodeSSH } from 'node-ssh'
 import * as fs from 'fs'
-import chalk from 'chalk'
 import inquirer from 'inquirer'
 import { info, success } from './src/logging.js'
 import { readSyncJson, writeJsonSync } from './src/file-helpers.js'
+import { git, npm } from './src/cli.js'
 
 function checkRepoChanges () {
   info('checking repo changes')
@@ -15,20 +15,6 @@ function checkRepoChanges () {
   info(`output from repo changes check: ${output}`)
 
   return output
-}
-
-function toolCommand (tool, command) {
-  info(`Executing: ${tool} ${command}`)
-
-  execSync(`${tool} ${command}`, { stdio: 'inherit' })
-}
-
-function npm (command) {
-  toolCommand('npm', command)
-}
-
-function git (command) {
-  toolCommand('git', command)
 }
 
 const branches = execSync('git branch')
