@@ -280,6 +280,8 @@ const { environment } = await inquirer.prompt({
 
 if(!sshConfig[environment]){
   // generate and save config
+  info('The environment chosen does not exist in the config.')
+
   const { host } = await inquirer.prompt({
     type: 'input',
     name: 'host',
