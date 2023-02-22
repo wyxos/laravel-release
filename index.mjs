@@ -4,6 +4,8 @@ import { NodeSSH } from 'node-ssh'
 import * as fs from 'fs'
 import chalk from 'chalk'
 import inquirer from 'inquirer'
+import { info, success } from './src/logging.js'
+import { readSyncJson, writeJsonSync } from './src/file-helpers.js'
 
 function checkRepoChanges () {
   info('checking repo changes')
@@ -13,18 +15,6 @@ function checkRepoChanges () {
   info(`output from repo changes check: ${output}`)
 
   return output
-}
-
-function logger (color, message) {
-  console.log(chalk[color](...message))
-}
-
-function info (...message) {
-  logger('yellow', message)
-}
-
-function success (...message) {
-  logger('green', message)
 }
 
 function toolCommand (tool, command) {
@@ -263,10 +253,10 @@ if (!fs.existsSync(sshConfigPath)) {
 
   info('Creating ssh-config.json')
 
-  fs.writeFileSync(sshConfigPath, JSON.stringify(sshConfigJson, null, 2))
+  writeJsonSync(sshConfigPath, sshConfigJson)
 }
 
-let sshConfig = JSON.parse(fs.readFileSync(sshConfigPath).toString())
+let sshConfig = readSyncJson(sshConfigPath)
 
 const ssh = new NodeSSH()
 
