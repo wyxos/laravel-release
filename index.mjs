@@ -254,7 +254,7 @@ const { environment } = await inquirer.prompt({
   }
 })
 
-if(!sshConfig[environment]){
+if (!sshConfig[environment]) {
   // generate and save config
   info('The environment chosen does not exist in the config.')
 
@@ -329,6 +329,10 @@ async function projectCommand (command) {
 }
 
 await projectCommand('git pull')
+
+if (phpChanges) {
+  await projectCommand('php artisan horizon:terminate')
+}
 
 if (composerChange) {
   await projectCommand('composer update --no-dev')
