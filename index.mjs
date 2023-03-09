@@ -99,9 +99,13 @@ let javascriptChange = 0
 if (files.length) {
   const items = files.split(/\n/).filter(Boolean)
 
-  // phpChanges = items.filter(value => value.indexOf('migrations') > -1).length
-  //
-  // info('php changes detected')
+  /** TODO adjust php check to pick up files only within certain directories
+   * such as app, routes, config, and .env
+   * @type {number}
+   */
+  phpChanges = items.filter(value => /\.(php)/.test(value)).length
+
+  info('php changes detected')
 
   databaseChange = items.filter(value => value.indexOf('migrations') > -1).length
 
@@ -173,7 +177,7 @@ git(`checkout ${releaseRepo}`)
 
 git('pull')
 
-git(`merge ${updatedRepo}`)
+git(`merge ${updatedRepo} -m "feat: merge release"`)
 
 git('push')
 
