@@ -20,7 +20,8 @@
     "ora": "^6.3.0",
     "prompts": "^2.4.2",
     "semver": "^7.3.8",
-    "simple-git": "^3.17.0"
+    "simple-git": "^3.17.0",
+    "yargs": "^17.7.1"
   },
   "bin": {
     "laravel-release": "./index.mjs"

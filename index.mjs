@@ -372,8 +372,16 @@ import simpleGit from 'simple-git'
 import prompts from 'prompts'
 import { execSync } from 'child_process'
 import { NodeSSH } from 'node-ssh'
+import yargs from 'yargs'
 import { info, success } from './src/logging.js'
 
+const argv = yargs(process.argv.slice(2)).options({
+  server: {
+    type: 'string',
+    description: 'Server label to skip server label prompt',
+    alias: 's'
+  }
+}).argv
 const projectDir = process.cwd()
 const git = simpleGit(projectDir)
 const ssh = new NodeSSH()
@@ -381,6 +389,15 @@ const ssh = new NodeSSH()
 const configFile = 'ssh-config.json'
 
 async function main() {
+  const gitignoreFile = path.join(projectDir, '.gitignore')
+
+  const gitignoreContent = fs.readFileSync(gitignoreFile, 'utf-8')
+
+  if (!gitignoreContent.includes(configFile)) {
+    info('Excluding ssh-config.json from repo...')
+    fs.appendFileSync(gitignoreFile, `\n${configFile}\n`)
+  }
+
   // Check for uncommitted changes
   const status = await git.status()
 
@@ -451,18 +468,45 @@ async function main() {
     }
   }
 
-  let { serverLabel } = await prompts(serverLabelPrompt)
+  let serverLabel = argv.server
 
-  console.log('selected', serverLabel)
+  if (!serverLabel) {
+    let serverLabelPrompt = {}
 
-  if (serverLabel === 'manual') {
-    const response = await prompts({
-      type: 'text',
-      name: 'serverLabel',
-      message: 'Enter the label for the server:'
-    })
+    if (Object.keys(sshConfig).length) {
+      serverLabelPrompt = {
+        type: 'select',
+        name: 'serverLabel',
+        message: 'Select the server to deploy:',
+        choices: [
+          ...Object.keys(sshConfig).map((label) => ({
+            item: label,
+            value: label
+          })),
+          { item: 'manual', value: 'manual' }
+        ]
+      }
+    } else {
+      serverLabelPrompt = {
+        type: 'text',
+        name: 'serverLabel',
+        message: 'Enter the label for the server:'
+      }
+    }
+
+    let response = await prompts(serverLabelPrompt)
 
     serverLabel = response.serverLabel
+
+    if (serverLabel === 'manual') {
+      const response = await prompts({
+        type: 'text',
+        name: 'serverLabel',
+        message: 'Enter the label for the server:'
+      })
+
+      serverLabel = response.serverLabel
+    }
   }
 
   if (!sshConfig[serverLabel]) {
@@ -482,7 +526,7 @@ async function main() {
     })
 
     const filteredChoices = choices.filter(
-      (branch) => branch.value !== serverDetails.releaseBranch
+      (branch) => branch.value !== releaseBranch
     )
 
     const { mergeBranch } = await prompts({
@@ -655,6 +699,20 @@ async function main() {
   await git.checkout(sshConfig.mergeBranch)
 
   success('Deployment completed.')
+
+  const serverLabels = Object.keys(sshConfig)
+
+  const packageJsonPath = './package.json'
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString())
+
+  serverLabels.forEach((label) => {
+    const scriptKey = `release:${label}`
+    if (!packageJson.scripts[scriptKey]) {
+      packageJson.scripts[scriptKey] = `npm run release -- --server=${label}`
+    }
+  })
+
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 }
 
 main()
