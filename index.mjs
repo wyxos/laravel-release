@@ -106,7 +106,7 @@ async function loadSshConfig() {
       }
     }
 
-    let response = await prompts(serverLabelPrompt)
+    const response = await prompts(serverLabelPrompt)
 
     serverLabel = response.serverLabel
 
@@ -208,7 +208,7 @@ async function deploy({ serverConfig, changes }) {
     privateKeyPath: serverConfig.privateKeyPath
   })
 
-  let options = {
+  const options = {
     cwd: serverConfig.projectPath,
     onStdout(chunk) {
       info('stdoutChunk', chunk.toString('utf8'))

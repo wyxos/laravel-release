@@ -31,12 +31,12 @@ const promptForNewVersion = async (currentVersion, defaultVersion) => {
 const projectDir = process.cwd()
 const git = SimpleGit(projectDir)
 
-const untrackedFiles = git.status().not_added.length > 0
+const untrackedFiles = git.status().not_added?.length > 0
 
 if (untrackedFiles) {
   info(
     'The following files are not part of the repository:' +
-      status.not_added.join('\n')
+      untrackedFiles.not_added.join('\n')
   )
 
   if (!untrackedFiles) {
@@ -48,7 +48,7 @@ execSyncOut('npm run lint')
 
 const status = await git.status()
 
-if (status.modified.length > 0) {
+if (status.modified?.length > 0) {
   await git.add('.')
   await git.commit('fix: lint')
 }
