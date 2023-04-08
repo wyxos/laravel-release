@@ -295,11 +295,33 @@ async function build(changes) {
 
 async function lint(modifiedFiles) {
   if (modifiedFiles.length) {
-    execSync('eslint --fix ' + modifiedFiles.join(','), { stdio: 'inherit' })
+    info('Initiating lint process...')
 
-    execSync('prettier --write ' + modifiedFiles.join(','), {
-      stdio: 'inherit'
-    })
+    execSync(
+      'eslint --fix ' +
+        modifiedFiles.filter((file) => /\.(js|vue|json)$/.test(file)).join(','),
+      {
+        stdio: 'inherit'
+      }
+    )
+
+    execSync(
+      'prettier --write ' +
+        modifiedFiles
+          .filter((file) => /\.(js|vue|json|html)$/.test(file))
+          .join(','),
+      {
+        stdio: 'inherit'
+      }
+    )
+
+    execSync(
+      'prettier --config .prettierrc.php.json --write ' +
+        modifiedFiles.filter((file) => /\.(php)$/.test(file)).join(','),
+      {
+        stdio: 'inherit'
+      }
+    )
 
     const lintStatus = await git.status()
 
