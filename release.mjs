@@ -58,8 +58,13 @@ writePackageJson(json)
 const tagVersion = `v${version}`
 const message = `"feat: release ${tagVersion}"`
 
+info('Pushing package.json update...')
 await git.add('.')
 await git.commit('.', message)
 await git.push()
+
+info(`Creating tag version v${version}...`)
 await git.addTag(tagVersion)
 await git.push('origin', tagVersion)
+
+success('Release complete.')
