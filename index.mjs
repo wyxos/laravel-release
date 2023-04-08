@@ -293,35 +293,41 @@ async function build(changes) {
   }
 }
 
-async function lint(modifiedFiles) {
+async function lint(modifiedFiles, changes) {
   if (modifiedFiles.length) {
     info('Initiating lint process...')
 
-    execSync(
-      'eslint --fix ' +
-        modifiedFiles.filter((file) => /\.(js|vue|json)$/.test(file)).join(','),
-      {
-        stdio: 'inherit'
-      }
-    )
+    if (changes.frontEnd) {
+      execSync(
+        'eslint --fix ' +
+          modifiedFiles
+            .filter((file) => /\.(js|vue|json)$/.test(file))
+            .join(','),
+        {
+          stdio: 'inherit'
+        }
+      )
 
-    execSync(
-      'prettier --write ' +
-        modifiedFiles
-          .filter((file) => /\.(js|vue|json|html)$/.test(file))
-          .join(','),
-      {
-        stdio: 'inherit'
-      }
-    )
+      execSync(
+        'prettier --write ' +
+          modifiedFiles
+            .filter((file) => /\.(js|vue|json|html)$/.test(file))
+            .join(' '),
+        {
+          stdio: 'inherit'
+        }
+      )
+    }
 
-    execSync(
-      'prettier --config .prettierrc.php.json --write ' +
-        modifiedFiles.filter((file) => /\.(php)$/.test(file)).join(','),
-      {
-        stdio: 'inherit'
-      }
-    )
+    if (changes.php) {
+      execSync(
+        'prettier --config .prettierrc.php.json --write ' +
+          modifiedFiles.filter((file) => /\.(php)$/.test(file)).join(' '),
+        {
+          stdio: 'inherit'
+        }
+      )
+    }
 
     const lintStatus = await git.status()
 
@@ -378,10 +384,25 @@ async function main() {
   const changes = scanChanges(modifiedFiles)
 
   // Run npm lint and commit if needed
-  await lint(modifiedFiles)
+  await lint(modifiedFiles, changes)
 
   // Check for changes in JavaScript, Vue, or JSON files
   await build(changes)
+
+  // Fetch the latest changes from the remote repository
+  await git.fetch()
+
+  const localCommit = await git.revparse([serverConfig.mergeBranch])
+  const remoteCommit = await git.revparse([
+    `origin/${serverConfig.mergeBranch}`
+  ])
+
+  const filesToPush = localCommit !== remoteCommit
+
+  if (filesToPush) {
+    info(`Updating origin/${serverConfig.mergeBranch}...`)
+    git.push()
+  }
 
   // Perform git checkout, pull, and merge
   await merge(serverConfig)
