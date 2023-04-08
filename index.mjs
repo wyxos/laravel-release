@@ -456,7 +456,7 @@ async function main() {
   console.log('selected', serverLabel)
 
   if (serverLabel === 'manual') {
-    let response = await prompts({
+    const response = await prompts({
       type: 'text',
       name: 'serverLabel',
       message: 'Enter the label for the server:'
