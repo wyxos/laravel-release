@@ -445,29 +445,6 @@ async function main() {
     sshConfig = JSON.parse(fs.readFileSync(configFile, 'utf-8'))
   }
 
-  let serverLabelPrompt = {}
-
-  if (Object.keys(sshConfig).length) {
-    serverLabelPrompt = {
-      type: 'select',
-      name: 'serverLabel',
-      message: 'Select the server to deploy:',
-      choices: [
-        ...Object.keys(sshConfig).map((label) => ({
-          item: label,
-          value: label
-        })),
-        { item: 'manual', value: 'manual' }
-      ]
-    }
-  } else {
-    serverLabelPrompt = {
-      type: 'text',
-      name: 'serverLabel',
-      message: 'Enter the label for the server:'
-    }
-  }
-
   let serverLabel = argv.server
 
   if (!serverLabel) {
@@ -483,7 +460,7 @@ async function main() {
             item: label,
             value: label
           })),
-          { item: 'manual', value: 'manual' }
+          { item: 'new', value: 'new' }
         ]
       }
     } else {
@@ -498,7 +475,7 @@ async function main() {
 
     serverLabel = response.serverLabel
 
-    if (serverLabel === 'manual') {
+    if (serverLabel === 'new') {
       const response = await prompts({
         type: 'text',
         name: 'serverLabel',
@@ -510,6 +487,7 @@ async function main() {
   }
 
   if (!sshConfig[serverLabel]) {
+    error(`The server configuration '${serverLabel}' does not exist.`)
     // Fetch list of branches
     const branches = await git.branch()
     const choices = branches.all.map((branch) => ({
@@ -579,6 +557,7 @@ async function main() {
     serverConfig.releaseBranch,
     serverConfig.mergeBranch
   ])
+
   const modifiedFiles = diffSummary.files.map((file) => file.file)
 
   // Check for changes in specific folders and files
@@ -586,9 +565,8 @@ async function main() {
     /^(app|config|database|routes|views)\/.+\.php$/.test(file)
   )
 
-  const jsVueJsonChanges = modifiedFiles.some(
-    (file) =>
-      /^resources\/.+(\.js|\.vue|\.json)$/.test(file) || file === 'package.json'
+  const jsVueJsonChanges = modifiedFiles.some((file) =>
+    /^resources\/.+(\.js|\.vue|\.json)$/.test(file)
   )
 
   const composerJsonChanges = modifiedFiles.includes('composer.json')
@@ -596,17 +574,20 @@ async function main() {
   const packageJsonChanges = modifiedFiles.includes('package.json')
 
   // Run npm lint and commit if needed
-  execSync('npm run lint', { stdio: 'inherit' })
+  if (modifiedFiles.length) {
+    execSync('eslint --fix ' + modifiedFiles.join(','), { stdio: 'inherit' })
 
-  const lintStatus = await git.status()
-  if (lintStatus.modified.length > 0 || lintStatus.not_added.length > 0) {
-    await git.commit('fix: code lint', '.')
+    const lintStatus = await git.status()
+    if (lintStatus.modified.length > 0 || lintStatus.not_added.length > 0) {
+      await git.commit('fix: code lint', '.')
 
-    await git.push()
+      await git.push()
+    }
   }
 
   // Check for changes in JavaScript, Vue, or JSON files
   let npmBuildExecuted = false
+
   if (jsVueJsonChanges) {
     const packageJsonPath = path.join(projectDir, 'package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
@@ -696,10 +677,10 @@ async function main() {
   // Close SSH connection and notify the user
   ssh.dispose()
 
-  await git.checkout(sshConfig.mergeBranch)
+  info('Restoring branch...')
+  await git.checkout(serverConfig.mergeBranch)
 
-  success('Deployment completed.')
-
+  // Add shortcut to release to an environment
   const serverLabels = Object.keys(sshConfig)
 
   const packageJsonPath = './package.json'
@@ -713,6 +694,8 @@ async function main() {
   })
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+
+  success('Deployment completed.')
 }
 
 main()

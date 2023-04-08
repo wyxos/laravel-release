@@ -11,3 +11,7 @@ export function info(...message) {
 export function success(...message) {
   logger('green', message)
 }
+
+export function error(...message) {
+  logger('red', message)
+}
