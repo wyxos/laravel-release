@@ -1,12 +1,45 @@
-import {execSync} from 'child_process'
+import { execSync } from 'child_process'
 import inquirer from 'inquirer'
+import SimpleGit from 'simple-git'
 import fs from 'fs'
 
 const execSyncOut = (command) => {
   execSync(command, { stdio: 'inherit' })
 }
 
-const json = JSON.parse(fs.readFileSync('./package.json').toString())
+const readPackageJson = () => {
+  return JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+}
+
+const writePackageJson = (json) => {
+  fs.writeFileSync('./package.json', JSON.stringify(json, null, 2))
+}
+
+const promptForNewVersion = async (currentVersion, defaultVersion) => {
+  const { version } = await inquirer.prompt([
+    {
+      name: 'version',
+      message: `Enter the version to publish (current ${currentVersion})`,
+      default: defaultVersion
+    }
+  ])
+
+  return version
+}
+
+const projectDir = process.cwd()
+const git = SimpleGit(projectDir)
+
+execSyncOut('npm run lint')
+
+const status = await git.status()
+
+if (status.modified.length > 0) {
+  await git.add('.')
+  await git.commit('fix: lint')
+}
+
+const json = readPackageJson()
 
 const currentVersion = json.version || '1.0.0.alpha.0'
 
@@ -17,34 +50,16 @@ defaultVersion[defaultVersion.length - 1] =
 
 defaultVersion = defaultVersion.join('.')
 
-const { version } = await inquirer.prompt([
-  {
-    name: 'version',
-    message: `Enter the version to publish (current ${currentVersion})`,
-    default: defaultVersion
-  }
-])
+const version = await promptForNewVersion(currentVersion, defaultVersion)
 
 json.version = version
-
-fs.writeFileSync('./package.json', JSON.stringify(json, null, 2))
+writePackageJson(json)
 
 const tagVersion = `v${version}`
-
 const message = `"feat: release ${tagVersion}"`
 
-// execSyncOut('npm run lint')
-
-// execSyncOut('npm run build')
-
-execSyncOut('git add .')
-
-execSyncOut(`git commit -m ${message}`)
-
-execSyncOut('git push')
-
-execSyncOut(`git tag -a v${version} -m "v${version}"`)
-
-execSyncOut(`git push origin v${version}`)
-
-
+await git.add('.')
+await git.commit('.', message)
+await git.push()
+await git.addTag(tagVersion)
+await git.push('origin', tagVersion)

@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node .",
     "release": "node release.mjs",
+    "lint": "eslint . --fix --ext .js,.mjs,.json && prettier --write **/*{.js,.json}",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,9 +16,23 @@
   "dependencies": {
     "chalk": "^5.2.0",
     "inquirer": "^9.1.4",
-    "node-ssh": "^13.0.1"
+    "node-ssh": "^13.0.1",
+    "ora": "^6.3.0",
+    "prompts": "^2.4.2",
+    "semver": "^7.3.8",
+    "simple-git": "^3.17.0"
   },
   "bin": {
     "laravel-release": "./index.mjs"
+  },
+  "devDependencies": {
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "prettier": "^2.8.7"
   }
 }
