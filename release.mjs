@@ -61,7 +61,7 @@ const message = `"feat: release ${tagVersion}"`
 
 info('Pushing package.json update...')
 await git.add('.')
-await git.commit('.', message)
+await git.commit(message, '.')
 await git.push()
 
 info(`Creating tag version v${version}...`)
