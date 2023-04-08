@@ -1,371 +1,4 @@
 #!/usr/bin/env node
-// import { execSync } from 'child_process'
-// import { NodeSSH } from 'node-ssh'
-// import * as fs from 'fs'
-// import inquirer from 'inquirer'
-// import { info, success } from './src/logging.js'
-// import { readSyncJson, writeJsonSync } from './src/file-helpers.js'
-// import { git, npm } from './src/cli.js'
-//
-// function checkRepoChanges () {
-//   info('checking repo changes')
-//
-//   const output = execSync('git diff-index HEAD --').toString().length
-//
-//   info(`output from repo changes check: ${output}`)
-//
-//   return output
-// }
-//
-// const branches = execSync('git branch')
-//   .toString()
-//   .split(/\n/)
-//   .filter(Boolean)
-//   .map(value => value
-//     .replace('* ', '')
-//     .replace(/\s/g, '')
-//   )
-//
-// const { releaseRepo } = await inquirer.prompt({
-//   name: 'releaseRepo',
-//   type: 'list',
-//   choices: branches,
-//   message: 'Which branch to release?'
-// })
-//
-// const { updatedRepo } = await inquirer.prompt({
-//   name: 'updatedRepo',
-//   type: 'list',
-//   message: 'Which branch to merge from?',
-//   choices: branches.filter(value => value !== releaseRepo)
-// })
-//
-// git(`checkout ${updatedRepo}`)
-//
-// git('pull')
-//
-// const gitIgnore = fs.readFileSync('.gitignore').toString()
-//
-// const doesIgnoreContainConfig = gitIgnore.indexOf('ssh-config.json') > -1
-//
-// if (!doesIgnoreContainConfig) {
-//   info('including ssh-config.json in .gitignore')
-//   fs.appendFileSync('.gitignore', 'ssh-config.json')
-// }
-//
-// const packageJson = JSON.parse(fs.readFileSync('package.json').toString())
-//
-// if (!packageJson.scripts.release) {
-//   info('adding "release" to package.json scripts')
-//
-//   packageJson.scripts.release = 'npx wyxos/laravel-release'
-//
-//   fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2))
-// }
-//
-// const untrackedFiles = execSync('git ls-files --other --exclude-standard').toString()
-//
-// const uncommittedFiles = checkRepoChanges()
-//
-// if (untrackedFiles || uncommittedFiles) {
-//   const { message } = await inquirer.prompt({
-//     name: 'message',
-//     message: 'There are untracked/uncommitted files. Provide a commit message',
-//     default () {
-//       return 'feat: pre-release'
-//     }
-//   })
-//
-//   git('add .')
-//
-//   git(`commit -m "${message}"`)
-// }
-//
-// const files = execSync(`git diff --name-only origin/${releaseRepo} ${updatedRepo}`).toString()
-//
-// let phpChanges = 0
-//
-// let databaseChange = 0
-//
-// let composerChange = 0
-//
-// let nodeChange = 0
-//
-// let javascriptChange = 0
-//
-// if (files.length) {
-//   const items = files.split(/\n/).filter(Boolean)
-//
-//   /** TODO adjust php check to pick up files only within certain directories
-//    * such as app, routes, config, and .env
-//    * @type {number}
-//    */
-//   phpChanges = items.filter(value => /\.(php)/.test(value)).length
-//
-//   info('php changes detected')
-//
-//   databaseChange = items.filter(value => value.indexOf('migrations') > -1).length
-//
-//   info(databaseChange ? 'migration changes detected' : 'no migration changes detected')
-//
-//   composerChange = items.filter(value => value.indexOf('composer.json') > -1).length
-//
-//   info(composerChange ? 'composer.json changes detected' : 'no composer.json changes detected')
-//
-//   nodeChange = items.filter(value => value.indexOf('package.json') > -1).length
-//
-//   info(nodeChange ? 'package.json changes detected' : 'no package.json changes detected')
-//
-//   javascriptChange = items.filter(value => /\.(js|vue|mjs|css|scss|pcss|json)/.test(value) && ['composer.json', 'package.json'].indexOf(value) === -1).length
-//
-//   info(javascriptChange ? 'front-end changes detected' : 'no front-end changes detected')
-// }
-//
-// npm('run lint')
-//
-// if (checkRepoChanges()) {
-//   git('add .')
-//
-//   if (checkRepoChanges()) {
-//     git(`commit -m "lint"`)
-//   }
-// }
-//
-// // change version of package.json
-// const json = JSON.parse(fs.readFileSync('./package.json').toString())
-//
-// const currentVersion = json.version || '1.0.0'
-//
-// let defaultVersion = currentVersion.split('.')
-//
-// defaultVersion[defaultVersion.length - 1] =
-//   Number(defaultVersion[defaultVersion.length - 1]) + 1
-//
-// defaultVersion = defaultVersion.join('.')
-//
-// const { version } = await inquirer.prompt([
-//   {
-//     name: 'version',
-//     message: `Enter the version to publish (current ${currentVersion})`,
-//     default: defaultVersion
-//   }
-// ])
-//
-// json.version = version
-//
-// fs.writeFileSync('./package.json', JSON.stringify(json, null, 2))
-//
-// const tagVersion = `v${version}`
-//
-// const message = `feat: release ${tagVersion}`
-//
-// // commit with release message
-//
-// git('add .')
-//
-// git(`commit -m "${message}"`)
-//
-// npm('run build')
-//
-// git('push')
-//
-// // update repo to release
-// git(`checkout ${releaseRepo}`)
-//
-// git('pull')
-//
-// git(`merge ${updatedRepo} -m "feat: merge release"`)
-//
-// git('push')
-//
-// // ssh into server
-//
-// const sshConfigPath = 'ssh-config.json'
-//
-// if (!fs.existsSync(sshConfigPath)) {
-//   // asks for environment, suggest development
-//   const { environment } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'environment',
-//     message: 'Environment for the config?',
-//     default () {
-//       return 'development'
-//     }
-//   })
-//
-//   const { host } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'host',
-//     message: 'SSH host/IP?',
-//     default () {
-//       return '192.168.100.10'
-//     }
-//   })
-//
-//   const { username } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'username',
-//     message: 'SSH with username?',
-//     default () {
-//       return 'runcloud'
-//     }
-//   })
-//
-//   const { privateKeyPath } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'privateKeyPath',
-//     message: 'SSH private key location?',
-//     default () {
-//       return 'C:\\Users\\your-user-name\\.ssh\\id_rsa'
-//     }
-//   })
-//
-//   const { cwd } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'cwd',
-//     message: 'Project location on server?',
-//     default () {
-//       return '/home/runcloud/webapps/my-app'
-//     }
-//   })
-//
-//   const sshConfigJson = {
-//     [environment]: {
-//       host,
-//       username,
-//       privateKeyPath,
-//       cwd
-//     }
-//   }
-//
-//   info('Creating ssh-config.json')
-//
-//   writeJsonSync(sshConfigPath, sshConfigJson)
-// }
-//
-// let sshConfig = readSyncJson(sshConfigPath)
-//
-// const ssh = new NodeSSH()
-//
-// const { environment } = await inquirer.prompt({
-//   name: 'environment',
-//   message: 'Environment config to use for SSH?',
-//   default () {
-//     return 'development'
-//   }
-// })
-//
-// if (!sshConfig[environment]) {
-//   // generate and save config
-//   info('The environment chosen does not exist in the config.')
-//
-//   const { host } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'host',
-//     message: 'SSH host/IP?',
-//     default () {
-//       return '192.168.100.10'
-//     }
-//   })
-//
-//   const { username } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'username',
-//     message: 'SSH with username?',
-//     default () {
-//       return 'runcloud'
-//     }
-//   })
-//
-//   const { privateKeyPath } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'privateKeyPath',
-//     message: 'SSH private key location?',
-//     default () {
-//       return 'C:\\Users\\your-user-name\\.ssh\\id_rsa'
-//     }
-//   })
-//
-//   const { cwd } = await inquirer.prompt({
-//     type: 'input',
-//     name: 'cwd',
-//     message: 'Project location on server?',
-//     default () {
-//       return '/home/runcloud/webapps/my-app'
-//     }
-//   })
-//
-//   sshConfig = {
-//     ...sshConfig,
-//     [environment]: {
-//       host,
-//       username,
-//       privateKeyPath,
-//       cwd
-//     }
-//   }
-//
-//   info('Updated ssh-config.json')
-//
-//   fs.writeFileSync(sshConfigPath, JSON.stringify(sshConfig, null, 2))
-// }
-//
-// const { host, privateKeyPath, username, cwd } = sshConfig[environment]
-//
-// await ssh.connect({
-//   host,
-//   privateKeyPath,
-//   username
-// })
-//
-// // execute git pull
-// async function projectCommand (command) {
-//   info('executing:', `"${command}"...`)
-//
-//   const result = await ssh.execCommand(command, { cwd })
-//
-//   success(result.stdout)
-//
-//   return result
-// }
-//
-// await projectCommand('git pull')
-//
-// if (phpChanges) {
-//   await projectCommand('php artisan horizon:terminate')
-// }
-//
-// if (composerChange) {
-//   await projectCommand('composer update --no-dev')
-// } else {
-//   info('no composer changes found.')
-// }
-//
-// if (databaseChange) {
-//   await projectCommand('php artisan migrate --force')
-// } else {
-//   info('no database changes found.')
-// }
-//
-// // execute npm i && npm run build
-// if (nodeChange) {
-//   await projectCommand('npm i')
-// } else {
-//   info('no node dependency changes found.')
-// }
-//
-// if (javascriptChange) {
-//   await projectCommand('npm run build')
-// } else {
-//   info('no front end changes found.')
-// }
-//
-// ssh.dispose()
-//
-// success('Release complete.')
-//
-// git(`checkout ${updatedRepo}`)
-
 import fs from 'fs'
 import path from 'path'
 import simpleGit from 'simple-git'
@@ -373,7 +6,7 @@ import prompts from 'prompts'
 import { execSync } from 'child_process'
 import { NodeSSH } from 'node-ssh'
 import yargs from 'yargs'
-import { info, success } from './src/logging.js'
+import { error, info, success } from './src/logging.js'
 
 const argv = yargs(process.argv.slice(2)).options({
   server: {
@@ -388,7 +21,7 @@ const ssh = new NodeSSH()
 
 const configFile = 'ssh-config.json'
 
-async function main() {
+function excludeConfigFromRepo() {
   const gitignoreFile = path.join(projectDir, '.gitignore')
 
   const gitignoreContent = fs.readFileSync(gitignoreFile, 'utf-8')
@@ -397,8 +30,9 @@ async function main() {
     info('Excluding ssh-config.json from repo...')
     fs.appendFileSync(gitignoreFile, `\n${configFile}\n`)
   }
+}
 
-  // Check for uncommitted changes
+async function untrackedFilesCheck() {
   const status = await git.status()
 
   const untrackedFiles = status.not_added.length > 0
@@ -437,8 +71,9 @@ async function main() {
 
     await git.push()
   }
+}
 
-  // Load or create SSH config
+async function loadSshConfig() {
   let sshConfig = {}
 
   if (fs.existsSync(configFile)) {
@@ -546,49 +181,86 @@ async function main() {
     fs.writeFileSync(configFile, JSON.stringify(sshConfig, null, 2))
   }
 
-  const serverConfig = sshConfig[serverLabel]
+  // Add shortcut to release to an environment
+  const serverLabels = Object.keys(sshConfig)
 
-  await git.checkout(serverConfig.mergeBranch)
+  const packageJsonPath = './package.json'
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString())
 
-  await git.pull()
+  serverLabels.forEach((label) => {
+    const scriptKey = `release:${label}`
+    if (!packageJson.scripts[scriptKey]) {
+      packageJson.scripts[scriptKey] = `npm run release -- --server=${label}`
+    }
+  })
 
-  // Perform git comparison and determine modified files
-  const diffSummary = await git.diffSummary([
-    serverConfig.releaseBranch,
-    serverConfig.mergeBranch
-  ])
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
-  const modifiedFiles = diffSummary.files.map((file) => file.file)
+  return sshConfig[serverLabel]
+}
 
-  // Check for changes in specific folders and files
-  const phpChanges = modifiedFiles.some((file) =>
-    /^(app|config|database|routes|views)\/.+\.php$/.test(file)
-  )
+async function deploy({ serverConfig, changes }) {
+  // SSH into server
+  info('Logging into server...')
+  await ssh.connect({
+    host: serverConfig.ip,
+    username: serverConfig.username,
+    privateKeyPath: serverConfig.privateKeyPath
+  })
 
-  const jsVueJsonChanges = modifiedFiles.some((file) =>
-    /^resources\/.+(\.js|\.vue|\.json)$/.test(file)
-  )
-
-  const composerJsonChanges = modifiedFiles.includes('composer.json')
-
-  const packageJsonChanges = modifiedFiles.includes('package.json')
-
-  // Run npm lint and commit if needed
-  if (modifiedFiles.length) {
-    execSync('eslint --fix ' + modifiedFiles.join(','), { stdio: 'inherit' })
-
-    const lintStatus = await git.status()
-    if (lintStatus.modified.length > 0 || lintStatus.not_added.length > 0) {
-      await git.commit('fix: code lint', '.')
-
-      await git.push()
+  let options = {
+    cwd: serverConfig.projectPath,
+    onStdout(chunk) {
+      info('stdoutChunk', chunk.toString('utf8'))
+    },
+    onStderr(chunk) {
+      error('stderrChunk', chunk.toString('utf8'))
     }
   }
 
-  // Check for changes in JavaScript, Vue, or JSON files
-  let npmBuildExecuted = false
+  // Execute git pull on server
+  info('Deploying...')
 
-  if (jsVueJsonChanges) {
+  await ssh.execCommand('git pull', options)
+
+  // Perform necessary actions based on changed files
+  if (changes.composer) {
+    info('Composer modifications detected. Executing relevant scripts...')
+
+    await ssh.execCommand('composer update', options)
+  }
+
+  if (changes.php) {
+    info('PHP modifications detected. Executing relevant scripts...')
+
+    await ssh.execCommand(
+      'php artisan view:clear && php artisan config:clear && php artisan horizon:terminate',
+      { cwd: serverConfig.projectPath }
+    )
+  }
+
+  if (changes.packageJson) {
+    info(
+      'Node dependencies modifications detected. Executing relevant scripts...'
+    )
+
+    await ssh.execCommand('npm i', options)
+  }
+
+  if (changes.build) {
+    info(
+      'Front-end assets modifications detected. Executing relevant scripts...'
+    )
+
+    await ssh.execCommand('npm run build', options)
+  }
+
+  // Close SSH connection and notify the user
+  ssh.dispose()
+}
+
+async function build(changes) {
+  if (changes.frontEnd) {
     const packageJsonPath = path.join(projectDir, 'package.json')
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
     const currentVersion = packageJson.version
@@ -617,83 +289,88 @@ async function main() {
     await git.commit(`feat: release v${newVersion}`, '.')
     await git.push()
 
-    npmBuildExecuted = true
+    changes.build = true
   }
+}
 
-  // Perform git checkout, pull, and merge
+async function lint(modifiedFiles) {
+  if (modifiedFiles.length) {
+    execSync('eslint --fix ' + modifiedFiles.join(','), { stdio: 'inherit' })
+
+    execSync('prettier --write ' + modifiedFiles.join(','), {
+      stdio: 'inherit'
+    })
+
+    const lintStatus = await git.status()
+
+    if (lintStatus.modified.length > 0 || lintStatus.not_added.length > 0) {
+      await git.commit('fix: code lint', '.')
+
+      await git.push()
+    }
+  }
+}
+
+async function merge(serverConfig) {
   await git.checkout(serverConfig.releaseBranch)
   await git.pull()
   await git.merge([serverConfig.mergeBranch])
   await git.push()
+}
 
-  // SSH into server
-  info('Logging into server...')
-  await ssh.connect({
-    host: serverConfig.ip,
-    username: serverConfig.username,
-    privateKeyPath: serverConfig.privateKeyPath
+function scanChanges(modifiedFiles) {
+  return {
+    php: modifiedFiles.some((file) =>
+      /^(app|config|database|routes|views)\/.+\.php$/.test(file)
+    ),
+    composer: modifiedFiles.includes('composer.json'),
+    packageJson: modifiedFiles.includes('package.json'),
+    frontEnd: modifiedFiles.some((file) =>
+      /^resources\/.+(\.js|\.vue|\.json)$/.test(file)
+    )
+  }
+}
+
+async function main() {
+  excludeConfigFromRepo()
+
+  // Check for uncommitted changes
+  await untrackedFilesCheck()
+
+  // Load or create SSH config
+  const serverConfig = await loadSshConfig()
+
+  await git.checkout(serverConfig.mergeBranch)
+
+  await git.pull()
+
+  // Perform git comparison and determine modified files
+  const diffSummary = await git.diffSummary([
+    serverConfig.releaseBranch,
+    serverConfig.mergeBranch
+  ])
+
+  const modifiedFiles = diffSummary.files.map((file) => file.file)
+
+  // Check for changes in specific folders and files
+  const changes = scanChanges(modifiedFiles)
+
+  // Run npm lint and commit if needed
+  await lint(modifiedFiles)
+
+  // Check for changes in JavaScript, Vue, or JSON files
+  await build(changes)
+
+  // Perform git checkout, pull, and merge
+  await merge(serverConfig)
+
+  await deploy({
+    serverConfig,
+    changes
   })
-
-  // Execute git pull on server
-  info('Deploying...')
-  await ssh.execCommand('git pull', { cwd: serverConfig.projectPath })
-
-  // Perform necessary actions based on changed files
-  if (composerJsonChanges) {
-    info('Composer modifications detected. Executing relevant scripts...')
-
-    await ssh.execCommand('composer update', { cwd: serverConfig.projectPath })
-  }
-
-  if (phpChanges) {
-    info('PHP modifications detected. Executing relevant scripts...')
-
-    await ssh.execCommand(
-      'php artisan view:clear && php artisan config:clear && php artisan horizon:terminate',
-      { cwd: serverConfig.projectPath }
-    )
-  }
-
-  if (packageJsonChanges) {
-    info(
-      'Node dependencies modifications detected. Executing relevant scripts...'
-    )
-
-    await ssh.execCommand('npm i', {
-      cwd: serverConfig.projectPath
-    })
-  }
-
-  if (npmBuildExecuted) {
-    info(
-      'Front-end assets modifications detected. Executing relevant scripts...'
-    )
-
-    await ssh.execCommand('npm run build', {
-      cwd: serverConfig.projectPath
-    })
-  }
-
-  // Close SSH connection and notify the user
-  ssh.dispose()
 
   info('Restoring branch...')
   await git.checkout(serverConfig.mergeBranch)
-
-  // Add shortcut to release to an environment
-  const serverLabels = Object.keys(sshConfig)
-
-  const packageJsonPath = './package.json'
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString())
-
-  serverLabels.forEach((label) => {
-    const scriptKey = `release:${label}`
-    if (!packageJson.scripts[scriptKey]) {
-      packageJson.scripts[scriptKey] = `npm run release -- --server=${label}`
-    }
-  })
-
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
   success('Deployment completed.')
 }
