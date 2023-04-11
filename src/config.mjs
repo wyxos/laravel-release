@@ -140,6 +140,14 @@ export async function loadConfig() {
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
+  const updateStatus = await git.status()
+
+  if (updateStatus.modified?.length > 0 || updateStatus.not_added?.length > 0) {
+    await git.commit('fix: scripts updated', '.')
+
+    await git.push()
+  }
+
   return sshConfig[serverLabel]
 }
 
