@@ -45,7 +45,7 @@ export async function deploy({ serverConfig, changes }) {
 
     await ssh.execCommand(
       'php artisan view:clear && php artisan config:clear && php artisan horizon:terminate',
-      { cwd: serverConfig.projectPath }
+      options
     )
   }
 
