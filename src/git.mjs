@@ -1,12 +1,12 @@
 import simpleGit from 'simple-git'
-import { info } from './logging.js'
+import { error, info } from './logging.js'
 import prompts from 'prompts'
 
 const projectDir = process.cwd()
 export const git = simpleGit(projectDir)
 
 export async function checkModifiedFiles() {
-  const status = await git.status()
+  let status = await git.status()
 
   const untrackedFiles = status.not_added.length > 0
 
@@ -29,6 +29,8 @@ export async function checkModifiedFiles() {
     await git.add(status.not_added)
   }
 
+  status = await git.status()
+
   const uncommittedChanges = status.modified.length > 0
 
   if (uncommittedChanges) {
@@ -40,9 +42,13 @@ export async function checkModifiedFiles() {
       message: 'Enter a commit message:'
     })
 
-    await git.commit(commitMessage, '.')
+    try {
+      await git.commit(commitMessage, '.')
 
-    await git.push()
+      await git.push()
+    } catch {
+      error('Failed to commit. Proceeding...')
+    }
   }
 }
 

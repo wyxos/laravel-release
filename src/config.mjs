@@ -131,14 +131,20 @@ export async function loadConfig() {
   const packageJsonPath = './package.json'
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString())
 
-  serverLabels.forEach((label) => {
-    const scriptKey = `release:${label}`
-    if (!packageJson.scripts[scriptKey]) {
-      packageJson.scripts[scriptKey] = `npm run release -- --server=${label}`
-    }
-  })
+  let missingScripts = serverLabels.filter(
+    (label) => !packageJson.scripts[`release:${label}`]
+  )
 
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  if (missingScripts.length) {
+    missingScripts.forEach((label) => {
+      const scriptKey = `release:${label}`
+      if (!packageJson.scripts[scriptKey]) {
+        packageJson.scripts[scriptKey] = `npm run release -- --server=${label}`
+      }
+    })
+
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  }
 
   const updateStatus = await git.status()
 
