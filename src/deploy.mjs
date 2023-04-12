@@ -20,8 +20,6 @@ export async function deploy({ serverConfig, changes }) {
     privateKeyPath: serverConfig.privateKeyPath
   }
 
-  console.log(sshConfig)
-
   await ssh.connect(sshConfig)
 
   const options = {

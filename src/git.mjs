@@ -1,4 +1,4 @@
-import { CleanOptions, simpleGit } from 'simple-git'
+import { simpleGit } from 'simple-git'
 import { info } from './logging.js'
 import prompts from 'prompts'
 
@@ -51,8 +51,15 @@ export async function checkModifiedFiles() {
 }
 
 export async function merge(serverConfig) {
-  await git.checkout(serverConfig.releaseBranch, [CleanOptions.FORCE])
+  info(`Switching to ${serverConfig.releaseBranch}...`)
+
+  await git.checkout(serverConfig.releaseBranch, ['-f'])
   await git.pull()
+
+  info(
+    `Merging changes from ${serverConfig.mergeBranch} into ${serverConfig.releaseBranch}...`
+  )
+
   await git.merge([serverConfig.mergeBranch])
   await git.push()
 }
