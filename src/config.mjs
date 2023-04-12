@@ -4,6 +4,7 @@ import prompts from 'prompts'
 import { error, info } from './logging.js'
 import { git } from './git.mjs'
 import path from 'path'
+import * as os from 'os'
 
 const projectDir = process.cwd()
 
@@ -122,7 +123,10 @@ export async function loadConfig() {
       mergeBranch
     }
 
-    fs.writeFileSync(configFile, JSON.stringify(sshConfig, null, 2))
+    fs.writeFileSync(
+      configFile,
+      JSON.stringify(sshConfig, null, 2).replace(/\n/g, os.EOL)
+    )
   }
 
   // Add shortcut to release to an environment
@@ -143,12 +147,11 @@ export async function loadConfig() {
       }
     })
 
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
-  }
+    fs.writeFileSync(
+      packageJsonPath,
+      JSON.stringify(packageJson, null, 2).replace(/\n/g, os.EOL)
+    )
 
-  const updateStatus = await git.status()
-
-  if (updateStatus.modified?.length > 0 || updateStatus.not_added?.length > 0) {
     await git.commit('fix: scripts updated', '.')
 
     await git.push()

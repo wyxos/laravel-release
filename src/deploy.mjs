@@ -5,18 +5,24 @@ import prompts from 'prompts'
 import { execSync } from 'child_process'
 import { git } from './git.mjs'
 import { NodeSSH } from 'node-ssh'
+import * as os from 'os'
 
 const projectDir = process.cwd()
+
 export async function deploy({ serverConfig, changes }) {
   const ssh = new NodeSSH()
 
   // SSH into server
   info('Logging into server...')
-  await ssh.connect({
+  const sshConfig = {
     host: serverConfig.ip,
     username: serverConfig.username,
     privateKeyPath: serverConfig.privateKeyPath
-  })
+  }
+
+  console.log(sshConfig)
+
+  await ssh.connect(sshConfig)
 
   const options = {
     cwd: serverConfig.projectPath,
@@ -95,11 +101,21 @@ export async function build(changes) {
     execSync('npm run build', { stdio: 'inherit' })
 
     packageJson.version = newVersion
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
-    await git.add('package.json')
-    await git.commit(`feat: release v${newVersion}`, '.')
-    await git.push()
+    fs.writeFileSync(
+      packageJsonPath,
+      JSON.stringify(packageJson, null, 2).replace(/\n/g, os.EOL)
+    )
+
+    await git.add('.')
+
+    const buildStatus = await git.status()
+
+    if (buildStatus.modified.length) {
+      await git.commit(`feat: release v${newVersion}`, '.')
+
+      await git.push()
+    }
 
     changes.build = true
   }
@@ -114,7 +130,7 @@ export async function lint(modifiedFiles, changes) {
         'eslint --fix ' +
           modifiedFiles
             .filter((file) => /\.(js|vue|json)$/.test(file))
-            .join(','),
+            .join(' '),
         {
           stdio: 'inherit'
         }
@@ -141,9 +157,13 @@ export async function lint(modifiedFiles, changes) {
       )
     }
 
-    const lintStatus = await git.status()
+    await git.add('.')
 
-    if (lintStatus.modified.length > 0 || lintStatus.not_added.length > 0) {
+    const status = await git.status()
+
+    if (status.modified.length > 0) {
+      info('Changes found after linting. Generating a commit...')
+
       await git.commit('fix: code lint', '.')
 
       await git.push()

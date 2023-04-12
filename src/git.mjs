@@ -1,5 +1,5 @@
-import simpleGit from 'simple-git'
-import { error, info } from './logging.js'
+import { CleanOptions, simpleGit } from 'simple-git'
+import { info } from './logging.js'
 import prompts from 'prompts'
 
 const projectDir = process.cwd()
@@ -29,6 +29,8 @@ export async function checkModifiedFiles() {
     await git.add(status.not_added)
   }
 
+  await git.add('.')
+
   status = await git.status()
 
   const uncommittedChanges = status.modified.length > 0
@@ -42,18 +44,14 @@ export async function checkModifiedFiles() {
       message: 'Enter a commit message:'
     })
 
-    try {
-      await git.commit(commitMessage, '.')
+    await git.commit(commitMessage, '.')
 
-      await git.push()
-    } catch {
-      error('Failed to commit. Proceeding...')
-    }
+    await git.push()
   }
 }
 
 export async function merge(serverConfig) {
-  await git.checkout(serverConfig.releaseBranch)
+  await git.checkout(serverConfig.releaseBranch, [CleanOptions.FORCE])
   await git.pull()
   await git.merge([serverConfig.mergeBranch])
   await git.push()
@@ -86,6 +84,9 @@ export async function checkForChanges(serverConfig) {
 
   return {
     modifiedFiles,
+    filesToLint: diffSummary.files
+      .filter((file) => !(file.deletions === file.changes)) // Exclude deleted files
+      .map((file) => file.file),
     changes: {
       php: modifiedFiles.some((file) =>
         /^(app|config|database|routes|views)\/.+\.php$/.test(file)

@@ -24,10 +24,10 @@ async function main() {
   await git.pull()
 
   // Check for changes in specific folders and files
-  const { modifiedFiles, changes } = await checkForChanges(serverConfig)
+  const { filesToLint, changes } = await checkForChanges(serverConfig)
 
   // Run npm lint and commit if needed
-  await lint(modifiedFiles, changes)
+  await lint(filesToLint, changes)
 
   // Check for changes in JavaScript, Vue, or JSON files
   await build(changes)
