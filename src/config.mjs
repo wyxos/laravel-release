@@ -131,7 +131,7 @@ export async function loadConfig() {
   const packageJsonPath = './package.json'
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString())
 
-  let missingScripts = serverLabels.filter(
+  const missingScripts = serverLabels.filter(
     (label) => !packageJson.scripts[`release:${label}`]
   )
 
