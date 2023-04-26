@@ -57,6 +57,7 @@ export async function deploy({ serverConfig, changes }) {
     info('Database changes have been detected')
 
     const { action } = await prompts({
+      type: 'select',
       name: 'action',
       message: 'Confirm which action to run following the database changes:',
       choices: [
