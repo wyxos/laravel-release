@@ -98,6 +98,10 @@ export async function checkForChanges(serverConfig) {
       php: modifiedFiles.some((file) =>
         /^(app|config|database|routes|views)\/.+\.php$/.test(file)
       ),
+      database: diffSummary.files
+        .filter((file) => !(file.deletions === file.changes)) // Exclude deleted files
+        .map((file) => file.file)
+        .some((file) => /^database\/.+\.php$/.test(file)),
       composer: modifiedFiles.includes('composer.json'),
       packageJson: modifiedFiles.includes('package.json'),
       frontEnd: modifiedFiles.some((file) =>

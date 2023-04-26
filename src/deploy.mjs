@@ -53,6 +53,44 @@ export async function deploy({ serverConfig, changes }) {
     )
   }
 
+  if (changes.database) {
+    info('Database changes have been detected')
+
+    const { action } = await prompts({
+      name: 'action',
+      message: 'Confirm which action to run following the database changes:',
+      choices: [
+        { title: 'php artisan migrate', value: 'migrate' },
+        {
+          title: 'php artisan migrate:fresh -f',
+          value: 'php artisan migrate:fresh -f'
+        },
+        {
+          title: 'php artisan migrate:fresh --seed -f',
+          value: 'php artisan migrate:fresh --seed -f'
+        }
+      ]
+    })
+
+    const handlers = {
+      migrate: () => 'php artisan migrate -f',
+      'migrate-refresh': () => 'php artisan migrate:fresh -f',
+      'migrate-fresh-seed': () => 'php artisan migrate:fresh --seed -f'
+    }
+
+    if (handlers[action]) {
+      const { proceed } = await prompts({
+        name: 'proceed',
+        message: `Are you sure you want to proceed with ${handlers[action]}`,
+        type: 'confirm'
+      })
+
+      if (proceed) {
+        await ssh.execCommand(handlers[action], options)
+      }
+    }
+  }
+
   const folderCheck = await ssh.execCommand(
     `test -d ${serverConfig.projectPath}/node_modules && echo 'exists' || echo 'not exists'`
   )
