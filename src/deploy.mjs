@@ -25,10 +25,10 @@ export async function deploy({ serverConfig, changes }) {
   const options = {
     cwd: serverConfig.projectPath,
     onStdout(chunk) {
-      info('stdoutChunk', chunk.toString('utf8'))
+      info(chunk.toString('utf8'))
     },
     onStderr(chunk) {
-      error('stderrChunk', chunk.toString('utf8'))
+      error(chunk.toString('utf8'))
     }
   }
 
