@@ -1,4 +1,4 @@
-import prompts from './prompts'
+import prompts from 'prompts'
 
 export default (command, options) =>
   prompts(command, {
