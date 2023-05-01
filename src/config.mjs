@@ -47,7 +47,7 @@ export async function loadConfig() {
   let serverLabel = argv.server
 
   if (!serverLabel) {
-    let serverLabelPrompt = {
+    const serverLabelPrompt = {
       type: (_, input) => (input ? 'text' : 'autocomplete'),
       name: 'serverLabel',
       message: 'Select the server to deploy or type a new label:',
