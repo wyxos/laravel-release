@@ -2,11 +2,6 @@ import { simpleGit } from 'simple-git'
 import { info } from './logging.mjs'
 import prompts from './prompts.mjs'
 
-process.on('SIGINT', () => {
-  console.log('\nAborting...')
-  process.exit()
-})
-
 const projectDir = process.cwd()
 export const git = simpleGit(projectDir)
 
