@@ -55,18 +55,25 @@ export async function loadConfig() {
 
   if (!serverLabel) {
     const serverLabelPrompt = {
-      type: (_, input) => (input ? 'text' : 'autocomplete'),
+      type: Object.keys(sshConfig).length ? 'autocomplete' : 'text',
       name: 'serverLabel',
-      message: 'Select the server to deploy or type a new label:',
+      message: Object.keys(sshConfig).length
+        ? 'Select the server to deploy to:'
+        : 'Set the label of the server to deploy to:',
       choices: Object.keys(sshConfig).map((label) => ({
         title: label,
         value: label
       })),
       suggest: (input, choices) =>
         Promise.resolve(
-          choices.filter((choice) =>
-            choice.title.toLowerCase().includes(input.toLowerCase())
-          )
+          choices
+            .filter((choice) =>
+              choice.title.toLowerCase().includes(input.toLowerCase())
+            )
+            .concat({
+              title: `Type manually: ${input}`,
+              value: input
+            })
         )
     }
 
