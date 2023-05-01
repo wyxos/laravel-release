@@ -1,6 +1,6 @@
 import { simpleGit } from 'simple-git'
 import { info } from './logging.js'
-import prompts from './prompts'
+import prompts from './prompts.mjs'
 
 process.on('SIGINT', () => {
   console.log('\nAborting...')

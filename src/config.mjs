@@ -1,6 +1,6 @@
 import yargs from 'yargs'
 import fs from 'fs'
-import prompts from './prompts'
+import prompts from './prompts.mjs'
 import { error, info } from './logging.js'
 import { git } from './git.mjs'
 import path from 'path'
