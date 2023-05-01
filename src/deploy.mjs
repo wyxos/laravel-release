@@ -1,7 +1,7 @@
 import { error, info } from './logging.js'
 import path from 'path'
 import fs from 'fs'
-import prompts from 'prompts'
+import prompts from './prompts'
 import { execSync } from 'child_process'
 import { git } from './git.mjs'
 import { NodeSSH } from 'node-ssh'
