@@ -60,10 +60,15 @@ export async function loadConfig() {
       message: Object.keys(sshConfig).length
         ? 'Select the server to deploy to:'
         : 'Set the label of the server to deploy to:',
-      choices: Object.keys(sshConfig).map((label) => ({
-        title: label,
-        value: label
-      })),
+      choices: Object.keys(sshConfig)
+        .map((label) => ({
+          title: label,
+          value: label
+        }))
+        .concat({
+          title: 'Type manually',
+          value: null
+        }),
       suggest: (input, choices) =>
         Promise.resolve(
           choices
