@@ -55,34 +55,43 @@ export async function loadConfig() {
 
   if (!serverLabel) {
     const serverLabelPrompt = {
-      type: Object.keys(sshConfig).length ? 'autocomplete' : 'text',
+      type: 'autocomplete',
       name: 'serverLabel',
-      message: Object.keys(sshConfig).length
-        ? 'Select the server to deploy to:'
-        : 'Set the label of the server to deploy to:',
-      choices: Object.keys(sshConfig)
-        .map((label) => ({
-          title: label,
-          value: label
-        }))
-        .concat({
-          title: 'Type manually',
-          value: null
-        }),
-      suggest: (input, choices) =>
-        Promise.resolve(
-          choices
-            .filter((choice) =>
-              choice.title.toLowerCase().includes(input.toLowerCase())
-            )
-            .concat({
-              title: `Type manually: ${input}`,
-              value: input
-            })
+      message: 'Select the server or type manually:',
+      choices: Object.keys(sshConfig).map((label) => ({
+        title: label,
+        value: label
+      })),
+      suggest: async (input, choices) => {
+        const filteredChoices = choices.filter((choice) =>
+          choice.title.toLowerCase().includes(input.toLowerCase())
         )
+
+        // Add the "Type manually" option to the suggestions
+        if (input) {
+          filteredChoices.push({
+            title: `Type manually: ${input}`,
+            value: input
+          })
+        }
+
+        return filteredChoices
+      }
     }
 
-    const response = await prompts(serverLabelPrompt)
+    const response = await prompts(serverLabelPrompt, {
+      onSubmit: async (prompt, answer) => {
+        if (prompt.name === 'serverLabel' && answer === 'type_manually') {
+          const manualResponse = await prompts({
+            type: 'text',
+            name: 'serverLabel',
+            message: 'Enter the label for the server:'
+          })
+
+          answer = manualResponse.serverLabel
+        }
+      }
+    })
 
     serverLabel = response.serverLabel
   }

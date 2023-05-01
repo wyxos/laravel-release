@@ -9,7 +9,8 @@
     "release": "node release.mjs",
     "lint": "eslint . --fix --ext .js,.mjs,.json && prettier --write **/*{.js,.json}",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release:": "npm run release -- --server="
+    "release:": "npm run release -- --server=",
+    "release:development": "npm run release -- --server=development"
   },
   "keywords": [],
   "author": "",

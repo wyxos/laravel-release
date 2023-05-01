@@ -1,9 +1,9 @@
 import prompts from 'prompts'
 
-process.on('SIGINT', () => {
-  console.log('\nAborting...')
-  process.exit()
-})
+// process.on('SIGINT', () => {
+//   console.log('\nAborting...')
+//   process.exit()
+// })
 export default (command, options) =>
   prompts(command, {
     onCancel: () => {
