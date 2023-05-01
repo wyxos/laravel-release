@@ -1,5 +1,5 @@
 import { simpleGit } from 'simple-git'
-import { info } from './logging.js'
+import { info } from './logging.mjs'
 import prompts from './prompts.mjs'
 
 process.on('SIGINT', () => {

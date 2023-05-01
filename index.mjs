@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { info, success } from './src/logging.js'
+import { info, success } from './src/logging.mjs'
 import {
   checkForChanges,
   checkModifiedFiles,

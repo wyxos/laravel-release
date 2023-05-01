@@ -1,4 +1,4 @@
-import { error, info } from './logging.js'
+import { error, info } from './logging.mjs'
 import path from 'path'
 import fs from 'fs'
 import prompts from './prompts.mjs'
