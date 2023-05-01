@@ -18,7 +18,7 @@ const argv = yargs(process.argv.slice(2)).options({
   }
 }).argv
 
-async function getPrivateKeyPaths() {
+export async function getPrivateKeyPaths() {
   let sshDir
   if (os.platform() === 'win32') {
     sshDir = path.join(os.homedir(), '.ssh')
@@ -28,8 +28,15 @@ async function getPrivateKeyPaths() {
 
   try {
     const files = await fs.promises.readdir(sshDir)
+
     return files
-      .filter((file) => file.endsWith('.pem') || file.endsWith('.key'))
+      .filter((file) => file.includes('id_rsa'))
+      .filter(
+        (file) =>
+          file.endsWith('.pem') ||
+          file.endsWith('.key') ||
+          file.indexOf('.') === -1
+      )
       .map((file) => path.join(sshDir, file))
   } catch (err) {
     console.error('Error reading SSH directory:', err.message)
