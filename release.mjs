@@ -2,7 +2,7 @@ import { execSync } from 'child_process'
 import inquirer from 'inquirer'
 import SimpleGit from 'simple-git'
 import fs from 'fs'
-import { info, success } from './src/logging.js'
+import { info, success } from './src/logging.mjs'
 
 const execSyncOut = (command) => {
   execSync(command, { stdio: 'inherit' })
