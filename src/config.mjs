@@ -107,6 +107,8 @@ export async function loadConfig() {
 
     const privateKeyPaths = await getPrivateKeyPaths()
 
+    console.log('keys', privateKeyPaths)
+
     const serverDetails = await prompts([
       {
         type: 'text',
@@ -114,18 +116,25 @@ export async function loadConfig() {
         message: 'Enter the IP of the server:'
       },
       {
-        type: (_, input) => (input ? 'text' : 'autocomplete'),
+        type: 'autocomplete',
         name: 'privateKeyPath',
         message: 'Select the path to the private key on your local machine:',
-        choices: privateKeyPaths.concat({
-          title: 'Type manually',
-          value: null
-        }),
+        choices: privateKeyPaths
+          .map((path) => ({ title: path, value: path }))
+          .concat({
+            title: 'Type manually',
+            value: null
+          }),
         suggest: (input, choices) =>
           Promise.resolve(
-            choices.filter((choice) =>
-              choice.title.toLowerCase().includes(input.toLowerCase())
-            )
+            choices
+              .filter((choice) =>
+                choice.title.toLowerCase().includes(input.toLowerCase())
+              )
+              .concat({
+                title: `Type manually: ${input}`,
+                value: input
+              })
           )
       },
       {
