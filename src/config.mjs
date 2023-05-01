@@ -18,6 +18,25 @@ const argv = yargs(process.argv.slice(2)).options({
   }
 }).argv
 
+async function getPrivateKeyPaths() {
+  let sshDir
+  if (os.platform() === 'win32') {
+    sshDir = path.join(os.homedir(), '.ssh')
+  } else {
+    sshDir = path.join(os.homedir(), '.ssh')
+  }
+
+  try {
+    const files = await fs.promises.readdir(sshDir)
+    return files
+      .filter((file) => file.endsWith('.pem') || file.endsWith('.key'))
+      .map((file) => path.join(sshDir, file))
+  } catch (err) {
+    console.error('Error reading SSH directory:', err.message)
+    return []
+  }
+}
+
 export async function loadConfig() {
   let sshConfig = {}
 
@@ -28,46 +47,31 @@ export async function loadConfig() {
   let serverLabel = argv.server
 
   if (!serverLabel) {
-    let serverLabelPrompt = {}
-
-    if (Object.keys(sshConfig).length) {
-      serverLabelPrompt = {
-        type: 'select',
-        name: 'serverLabel',
-        message: 'Select the server to deploy:',
-        choices: [
-          ...Object.keys(sshConfig).map((label) => ({
-            item: label,
-            value: label
-          })),
-          { item: 'new', value: 'new' }
-        ]
-      }
-    } else {
-      serverLabelPrompt = {
-        type: 'text',
-        name: 'serverLabel',
-        message: 'Enter the label for the server:'
-      }
+    let serverLabelPrompt = {
+      type: (_, input) => (input ? 'text' : 'autocomplete'),
+      name: 'serverLabel',
+      message: 'Select the server to deploy or type a new label:',
+      choices: Object.keys(sshConfig).map((label) => ({
+        title: label,
+        value: label
+      })),
+      suggest: (input, choices) =>
+        Promise.resolve(
+          choices.filter((choice) =>
+            choice.title.toLowerCase().includes(input.toLowerCase())
+          )
+        )
     }
 
     const response = await prompts(serverLabelPrompt)
 
     serverLabel = response.serverLabel
-
-    if (serverLabel === 'new') {
-      const response = await prompts({
-        type: 'text',
-        name: 'serverLabel',
-        message: 'Enter the label for the server:'
-      })
-
-      serverLabel = response.serverLabel
-    }
   }
 
   if (!sshConfig[serverLabel]) {
-    error(`The server configuration '${serverLabel}' does not exist.`)
+    error(
+      `The server configuration '${serverLabel}' does not exist. Generating the config...`
+    )
     // Fetch list of branches
     const branches = await git.branch()
     const choices = branches.all.map((branch) => ({
@@ -94,6 +98,8 @@ export async function loadConfig() {
       choices: filteredChoices
     })
 
+    const privateKeyPaths = await getPrivateKeyPaths()
+
     const serverDetails = await prompts([
       {
         type: 'text',
@@ -101,9 +107,19 @@ export async function loadConfig() {
         message: 'Enter the IP of the server:'
       },
       {
-        type: 'text',
+        type: (_, input) => (input ? 'text' : 'autocomplete'),
         name: 'privateKeyPath',
-        message: 'Enter the path to the private key on your local machine:'
+        message: 'Select the path to the private key on your local machine:',
+        choices: privateKeyPaths.concat({
+          title: 'Type manually',
+          value: null
+        }),
+        suggest: (input, choices) =>
+          Promise.resolve(
+            choices.filter((choice) =>
+              choice.title.toLowerCase().includes(input.toLowerCase())
+            )
+          )
       },
       {
         type: 'text',
