@@ -90,11 +90,11 @@ export async function loadConfig() {
     const branches = await git.branch()
 
     const choices = branches.all
+      .filter((branch) => !branch.includes('remotes'))
       .map((branch) => ({
         title: branch,
         value: branch
       }))
-      .filter((branch) => !branch.includes('remotes'))
 
     // Prompt user for branches to release and merge
     const { releaseBranch } = await prompts({
