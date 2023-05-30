@@ -19,9 +19,11 @@ async function main() {
   // Load or create SSH config
   const serverConfig = await loadConfig()
 
-  // Checkout and update the branch to be merged from
-  await git.checkout(serverConfig.mergeBranch)
-  await git.pull()
+  if (serverConfig.mergeBranch !== serverConfig.releaseBranch) {
+    // Checkout and update the branch to be merged from
+    await git.checkout(serverConfig.mergeBranch)
+    await git.pull()
+  }
 
   // Check for changes in specific folders and files
   const { filesToLint, changes } = await checkForChanges(serverConfig)
@@ -44,8 +46,10 @@ async function main() {
     changes
   })
 
-  info('Restoring branch...')
-  await git.checkout(serverConfig.mergeBranch)
+  if (serverConfig.mergeBranch !== serverConfig.releaseBranch) {
+    info('Restoring branch...')
+    await git.checkout(serverConfig.mergeBranch)
+  }
 
   success('Deployment completed.')
 }

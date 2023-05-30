@@ -54,46 +54,32 @@ export async function loadConfig() {
   let serverLabel = argv.server
 
   if (!serverLabel) {
-    const serverLabelPrompt = {
-      type: 'autocomplete',
-      name: 'serverLabel',
-      message: 'Select the server or type manually:',
-      choices: Object.keys(sshConfig).map((label) => ({
-        title: label,
-        value: label
-      })),
-      suggest: async (input, choices) => {
-        const filteredChoices = choices.filter((choice) =>
-          choice.title.toLowerCase().includes(input.toLowerCase())
-        )
-
-        // Add the "Type manually" option to the suggestions
-        if (input) {
-          filteredChoices.push({
-            title: `Type manually: ${input}`,
-            value: input
-          })
-        }
-
-        return filteredChoices
+    if (Object.keys(sshConfig).length) {
+      const serverLabelPrompt = {
+        type: 'autocomplete',
+        name: 'serverLabel',
+        message: 'Select the server or type manually:',
+        choices: Object.keys(sshConfig).map((label) => ({
+          title: label,
+          value: label
+        }))
       }
+
+      const response = await prompts(serverLabelPrompt)
+
+      serverLabel = response.serverLabel
     }
 
-    const response = await prompts(serverLabelPrompt, {
-      onSubmit: async (prompt, answer) => {
-        if (prompt.name === 'serverLabel' && answer === 'type_manually') {
-          const manualResponse = await prompts({
-            type: 'text',
-            name: 'serverLabel',
-            message: 'Enter the label for the server:'
-          })
-
-          answer = manualResponse.serverLabel
-        }
+    if (serverLabel === undefined) {
+      const manualInputPrompt = {
+        type: 'text',
+        name: 'manualInput',
+        message: 'Enter the server label manually:'
       }
-    })
+      const manualResponse = await prompts(manualInputPrompt)
 
-    serverLabel = response.serverLabel
+      serverLabel = manualResponse.manualInput
+    }
   }
 
   if (!sshConfig[serverLabel]) {
@@ -102,10 +88,13 @@ export async function loadConfig() {
     )
     // Fetch list of branches
     const branches = await git.branch()
-    const choices = branches.all.map((branch) => ({
-      title: branch,
-      value: branch
-    }))
+
+    const choices = branches.all
+      .map((branch) => ({
+        title: branch,
+        value: branch
+      }))
+      .filter((branch) => !branch.includes('remotes'))
 
     // Prompt user for branches to release and merge
     const { releaseBranch } = await prompts({
@@ -115,15 +104,15 @@ export async function loadConfig() {
       choices
     })
 
-    const filteredChoices = choices.filter(
-      (branch) => branch.value !== releaseBranch
-    )
+    // const filteredChoices = choices.filter(
+    //   (branch) => branch.value !== releaseBranch
+    // )
 
     const { mergeBranch } = await prompts({
       type: 'select',
       name: 'mergeBranch',
       message: 'Select the branch to merge from:',
-      choices: filteredChoices
+      choices
     })
 
     const privateKeyPaths = await getPrivateKeyPaths()
