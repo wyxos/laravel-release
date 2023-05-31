@@ -185,13 +185,17 @@ export async function lint(modifiedFiles, changes) {
     }
 
     if (changes.php) {
-      execSync(
-        'prettier --config .prettierrc.php.json --write ' +
-          modifiedFiles.filter((file) => /\.(php)$/.test(file)).join(' '),
-        {
+      const phpFiles = modifiedFiles
+        .filter((file) => /\.(php)$/.test(file))
+        .join(' ')
+
+      info('linting php files ' + phpFiles)
+
+      if (phpFiles.length) {
+        execSync('prettier --config .prettierrc.php.json --write ' + phpFiles, {
           stdio: 'inherit'
-        }
-      )
+        })
+      }
     }
 
     await git.add('.')
