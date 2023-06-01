@@ -18,7 +18,7 @@ function parseGitDiff(diffOutput) {
 
   const lines = diffOutput.split('\n')
 
-  for (let line of lines) {
+  for (const line of lines) {
     const parts = line.split('\t')
 
     if (parts.length < 2) continue
