@@ -7,9 +7,59 @@ import { git } from './git.mjs'
 import { NodeSSH } from 'node-ssh'
 import * as os from 'os'
 
+function parseGitDiff(diffOutput) {
+  const changes = {
+    php: [],
+    ui: [],
+    database: [],
+    composer: false,
+    packageJson: false
+  }
+
+  const lines = diffOutput.split('\n')
+
+  for (let line of lines) {
+    const parts = line.split('\t')
+
+    if (parts.length < 2) continue
+
+    const [status, path] = line.split('\t')
+
+    if (status === 'D') continue // Skip deleted files
+
+    if (path.endsWith('.php')) {
+      if (
+        path.startsWith('app') ||
+        path.startsWith('config') ||
+        path.startsWith('database') ||
+        path.startsWith('routes') ||
+        path.startsWith('views')
+      ) {
+        changes.php.push(path)
+      }
+    } else if (
+      path.endsWith('.vue') ||
+      path.endsWith('.js') ||
+      path.endsWith('.json')
+    ) {
+      if (path.startsWith('resources')) {
+        changes.ui.push(path)
+      }
+    } else if (path.startsWith('database')) {
+      changes.database.push(path)
+    } else if (path === 'composer.json') {
+      changes.composer = true
+    } else if (path === 'package.json') {
+      changes.packageJson = true
+    }
+  }
+
+  return changes
+}
+
 const projectDir = process.cwd()
 
-export async function deploy({ serverConfig, changes }) {
+export async function deploy({ serverConfig }) {
   const ssh = new NodeSSH()
 
   // SSH into server
@@ -21,6 +71,12 @@ export async function deploy({ serverConfig, changes }) {
   }
 
   await ssh.connect(sshConfig)
+
+  // Determine the changes between the current and latest states of the branch
+  const diffResult = await ssh.execCommand('git diff --name-status origin/main')
+
+  // Parse the output of the git diff command into a changes object
+  const changes = parseGitDiff(diffResult.stdout)
 
   const options = {
     cwd: serverConfig.projectPath,
@@ -38,10 +94,16 @@ export async function deploy({ serverConfig, changes }) {
   await ssh.execCommand('git pull', options)
 
   // Perform necessary actions based on changed files
-  if (changes.composer) {
+  const vendorFolderCheck = await ssh.execCommand(
+    `test -d ${serverConfig.projectPath}/vendor && echo 'exists' || echo 'not exists'`
+  )
+
+  const vendorExists = vendorFolderCheck.stdout.trim() === 'exists'
+
+  if (changes.composer || !vendorExists) {
     info('Composer modifications detected. Executing relevant scripts...')
 
-    await ssh.execCommand('composer update', options)
+    await ssh.execCommand('composer update --no-dev', options)
   }
 
   if (changes.php) {
@@ -104,7 +166,7 @@ export async function deploy({ serverConfig, changes }) {
     await ssh.execCommand('npm i', options)
   }
 
-  if (changes.build || !nodeModulesExists) {
+  if (changes.ui && nodeModulesExists) {
     info('Building front-end assets...')
 
     await ssh.execCommand('npm run build', options)
