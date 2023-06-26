@@ -73,10 +73,14 @@ export async function deploy({ serverConfig }) {
   await ssh.connect(sshConfig)
 
   // Determine the changes between the current and latest states of the branch
-  const diffResult = await ssh.execCommand('git diff --name-status origin/main')
+  const diffResult = await ssh.execCommand(
+    `git diff --name-status origin/${serverConfig.releaseBranch}`
+  )
 
   // Parse the output of the git diff command into a changes object
   const changes = parseGitDiff(diffResult.stdout)
+
+  console.log('changes')
 
   const options = {
     cwd: serverConfig.projectPath,
