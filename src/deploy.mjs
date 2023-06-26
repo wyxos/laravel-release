@@ -106,7 +106,7 @@ export async function deploy({ serverConfig }) {
     await ssh.execCommand('composer update --no-dev', options)
   }
 
-  if (changes.php) {
+  if (changes.php.length) {
     info('PHP modifications detected. Executing relevant scripts...')
 
     await ssh.execCommand(
@@ -115,7 +115,7 @@ export async function deploy({ serverConfig }) {
     )
   }
 
-  if (changes.database) {
+  if (changes.database.length) {
     info('Database changes have been detected')
 
     const { action } = await prompts({
@@ -144,12 +144,12 @@ export async function deploy({ serverConfig }) {
     if (handlers[action]) {
       const { proceed } = await prompts({
         name: 'proceed',
-        message: `Are you sure you want to proceed with ${handlers[action]}`,
+        message: `Are you sure you want to proceed with ${handlers[action]()}`,
         type: 'confirm'
       })
 
       if (proceed) {
-        await ssh.execCommand(handlers[action], options)
+        await ssh.execCommand(handlers[action](), options)
       }
     }
   }
@@ -166,7 +166,7 @@ export async function deploy({ serverConfig }) {
     await ssh.execCommand('npm i', options)
   }
 
-  if (changes.ui && nodeModulesExists) {
+  if (changes.ui.length && nodeModulesExists) {
     info('Building front-end assets...')
 
     await ssh.execCommand('npm run build', options)
