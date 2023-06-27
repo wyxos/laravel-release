@@ -88,7 +88,7 @@ export async function deploy({ serverConfig }) {
 
   info(`executing git fetch origin ${serverConfig.releaseBranch}`)
   await ssh.execCommand(
-    `git fetch origin/${serverConfig.releaseBranch}`,
+    `git fetch origin ${serverConfig.releaseBranch}`,
     options
   )
 
