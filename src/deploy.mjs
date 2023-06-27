@@ -85,6 +85,8 @@ export async function deploy({ serverConfig }) {
     `git diff --name-status origin/${serverConfig.releaseBranch}`
   )
 
+  info(`diff output ${diffResult}`)
+
   // Parse the output of the git diff command into a changes object
   const changes = parseGitDiff(diffResult.stdout)
 
