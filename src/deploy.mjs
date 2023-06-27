@@ -18,12 +18,16 @@ function parseGitDiff(diffOutput) {
 
   const lines = diffOutput.split('\n')
 
+  console.log('lines', lines)
+
   for (const line of lines) {
     const parts = line.split('\t')
 
     if (parts.length < 2) continue
 
     const [status, path] = line.split('\t')
+
+    console.log('line', line)
 
     if (status === 'D') continue // Skip deleted files
 
