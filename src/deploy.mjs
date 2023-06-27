@@ -76,9 +76,11 @@ export async function deploy({ serverConfig }) {
 
   await ssh.connect(sshConfig)
 
+  info(`executing git fetch origin/${serverConfig.releaseBranch}`)
   await ssh.execCommand(`git fetch origin/${serverConfig.releaseBranch}`)
 
   // Determine the changes between the current and latest states of the branch
+  info(`executing git diff --name-status origin/${serverConfig.releaseBranch}`)
   const diffResult = await ssh.execCommand(
     `git diff --name-status origin/${serverConfig.releaseBranch}`
   )
