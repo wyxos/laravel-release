@@ -80,7 +80,7 @@ export async function deploy({ serverConfig }) {
   // Parse the output of the git diff command into a changes object
   const changes = parseGitDiff(diffResult.stdout)
 
-  console.log('changes')
+  console.log('changes', changes)
 
   const options = {
     cwd: serverConfig.projectPath,
