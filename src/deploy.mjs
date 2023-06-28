@@ -43,9 +43,9 @@ function parseGitDiff(diffOutput) {
       }
     } else if (path.startsWith('database')) {
       changes.database.push(path)
-    } else if (path === 'composer.json') {
+    } else if (path.startsWith('composer.json')) {
       changes.composer = true
-    } else if (path === 'package.json') {
+    } else if (path.startsWith('package.json')) {
       changes.packageJson = true
     }
   }
