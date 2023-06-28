@@ -1,6 +1,6 @@
 {
   "name": "@wyxos/laravel-release",
-  "version": "2.0.38",
+  "version": "2.0.39",
   "description": "",
   "main": "index.mjs",
   "type": "module",
