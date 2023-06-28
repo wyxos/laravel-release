@@ -18,8 +18,6 @@ function parseGitDiff(diffOutput) {
 
   const lines = diffOutput.split('\n')
 
-  console.log('lines', lines)
-
   for (const line of lines) {
     const [status, path] = line.split('\t')
 
@@ -97,8 +95,6 @@ export async function deploy({ serverConfig }) {
 
   // Parse the output of the git diff command into a changes object
   const changes = parseGitDiff(diffResult.stdout)
-
-  console.log('changes', changes)
 
   // Execute git pull on server
   info('Deploying...')

@@ -117,8 +117,6 @@ export async function loadConfig() {
 
     const privateKeyPaths = await getPrivateKeyPaths()
 
-    console.log('keys', privateKeyPaths)
-
     const serverDetails = await prompts([
       {
         type: 'text',
