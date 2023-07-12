@@ -24,16 +24,10 @@ function parseGitDiff(diffOutput) {
     if (status === 'D') continue // Skip deleted files
 
     if (path.endsWith('.php')) {
-      if (
-        path.startsWith('app') ||
-        path.startsWith('config') ||
-        path.startsWith('database') ||
-        path.startsWith('routes') ||
-        path.startsWith('views')
-      ) {
-        changes.php.push(path)
-      }
-    } else if (
+      changes.php.push(path)
+    }
+
+    if (
       path.endsWith('.vue') ||
       path.endsWith('.js') ||
       path.endsWith('.json')
@@ -41,11 +35,17 @@ function parseGitDiff(diffOutput) {
       if (path.startsWith('resources')) {
         changes.ui.push(path)
       }
-    } else if (path.startsWith('database')) {
+    }
+
+    if (path.startsWith('database')) {
       changes.database.push(path)
-    } else if (path.startsWith('composer.json')) {
+    }
+
+    if (path.startsWith('composer.json')) {
       changes.composer = true
-    } else if (path.startsWith('package.json')) {
+    }
+
+    if (path.startsWith('package.json')) {
       changes.packageJson = true
     }
   }
@@ -129,19 +129,21 @@ export async function deploy({ serverConfig }) {
       name: 'action',
       message: 'Confirm which action to run following the database changes:',
       choices: [
-        { title: 'php artisan migrate', value: 'migrate' },
+        { title: 'skip', value: 'skip' },
+        { title: 'php artisan migrate -f', value: 'migrate' },
         {
           title: 'php artisan migrate:fresh -f',
-          value: 'php artisan migrate:fresh -f'
+          value: 'migrate-refresh'
         },
         {
           title: 'php artisan migrate:fresh --seed -f',
-          value: 'php artisan migrate:fresh --seed -f'
+          value: 'migrate-fresh-seed'
         }
       ]
     })
 
     const handlers = {
+      skip: null,
       migrate: () => 'php artisan migrate -f',
       'migrate-refresh': () => 'php artisan migrate:fresh -f',
       'migrate-fresh-seed': () => 'php artisan migrate:fresh --seed -f'
@@ -150,7 +152,9 @@ export async function deploy({ serverConfig }) {
     if (handlers[action]) {
       const { proceed } = await prompts({
         name: 'proceed',
-        message: `Are you sure you want to proceed with ${handlers[action]()}`,
+        message: `Are you sure you want to proceed with ${handlers[
+          action
+        ]()}? (You better know what you're doing)`,
         type: 'confirm'
       })
 
