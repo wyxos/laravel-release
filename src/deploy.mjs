@@ -97,6 +97,8 @@ export async function deploy({ serverConfig }) {
   // Execute git pull on server
   info('Deploying...')
 
+  await ssh.execCommand('php artisan down')
+
   await ssh.execCommand('git pull', options)
 
   // Perform necessary actions based on changed files
@@ -181,6 +183,8 @@ export async function deploy({ serverConfig }) {
 
     await ssh.execCommand('npm run build', options)
   }
+
+  await ssh.execCommand('php artisan up')
 
   // Close SSH connection and notify the user
   ssh.dispose()
