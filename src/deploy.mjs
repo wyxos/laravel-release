@@ -130,13 +130,13 @@ export async function deploy({ serverConfig }) {
       message: 'Confirm which action to run following the database changes:',
       choices: [
         { title: 'skip', value: 'skip' },
-        { title: 'php artisan migrate -f', value: 'migrate' },
+        { title: 'php artisan migrate --force', value: 'migrate' },
         {
-          title: 'php artisan migrate:fresh -f',
+          title: 'php artisan migrate:fresh --force',
           value: 'migrate-refresh'
         },
         {
-          title: 'php artisan migrate:fresh --seed -f',
+          title: 'php artisan migrate:fresh --seed --force',
           value: 'migrate-fresh-seed'
         }
       ]
