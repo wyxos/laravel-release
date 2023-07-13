@@ -127,23 +127,7 @@ export async function loadConfig() {
         type: 'autocomplete',
         name: 'privateKeyPath',
         message: 'Select the path to the private key on your local machine:',
-        choices: privateKeyPaths
-          .map((path) => ({ title: path, value: path }))
-          .concat({
-            title: 'Type manually',
-            value: null
-          }),
-        suggest: (input, choices) =>
-          Promise.resolve(
-            choices
-              .filter((choice) =>
-                choice.title.toLowerCase().includes(input.toLowerCase())
-              )
-              .concat({
-                title: `Type manually: ${input}`,
-                value: input
-              })
-          )
+        choices: privateKeyPaths.map((path) => ({ title: path, value: path }))
       },
       {
         type: 'text',

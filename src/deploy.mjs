@@ -99,7 +99,7 @@ export async function deploy({ serverConfig }) {
 
   info('Applying maintenance mode...')
 
-  await ssh.execCommand('php artisan down')
+  await ssh.execCommand('php artisan down', options)
 
   success('App offline.')
 
@@ -190,7 +190,7 @@ export async function deploy({ serverConfig }) {
 
   info('Restoring app from maintenance mode...')
 
-  await ssh.execCommand('php artisan up')
+  await ssh.execCommand('php artisan up', options)
 
   success('App online.')
 
