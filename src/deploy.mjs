@@ -97,11 +97,13 @@ export async function deploy({ serverConfig }) {
   // Execute git pull on server
   info('Initiating deployment process...')
 
-  info('Applying maintenance mode...')
+  if (changes.php.length) {
+    info('Applying maintenance mode...')
 
-  await ssh.execCommand('php artisan down', options)
+    await ssh.execCommand('php artisan down', options)
 
-  success('App offline.')
+    success('App offline.')
+  }
 
   await ssh.execCommand('git pull', options)
 
@@ -188,11 +190,13 @@ export async function deploy({ serverConfig }) {
     await ssh.execCommand('npm run build', options)
   }
 
-  info('Restoring app from maintenance mode...')
+  if (changes.php.length) {
+    info('Restoring app from maintenance mode...')
 
-  await ssh.execCommand('php artisan up', options)
+    await ssh.execCommand('php artisan up', options)
 
-  success('App online.')
+    success('App online.')
+  }
 
   // Close SSH connection and notify the user
   ssh.dispose()
