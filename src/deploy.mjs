@@ -1,4 +1,4 @@
-import { error, info } from './logging.mjs'
+import { error, info, success } from './logging.mjs'
 import path from 'path'
 import fs from 'fs'
 import prompts from './prompts.mjs'
@@ -95,9 +95,13 @@ export async function deploy({ serverConfig }) {
   console.log('changes detected', changes)
 
   // Execute git pull on server
-  info('Deploying...')
+  info('Initiating deployment process...')
+
+  info('Applying maintenance mode...')
 
   await ssh.execCommand('php artisan down')
+
+  success('App offline.')
 
   await ssh.execCommand('git pull', options)
 
@@ -184,10 +188,16 @@ export async function deploy({ serverConfig }) {
     await ssh.execCommand('npm run build', options)
   }
 
+  info('Restoring app from maintenance mode...')
+
   await ssh.execCommand('php artisan up')
+
+  success('App online.')
 
   // Close SSH connection and notify the user
   ssh.dispose()
+
+  success('SSH session closed.')
 }
 
 export async function build(changes) {
