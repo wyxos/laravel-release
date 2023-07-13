@@ -144,9 +144,9 @@ export async function deploy({ serverConfig }) {
 
     const handlers = {
       skip: null,
-      migrate: () => 'php artisan migrate -f',
-      'migrate-refresh': () => 'php artisan migrate:fresh -f',
-      'migrate-fresh-seed': () => 'php artisan migrate:fresh --seed -f'
+      migrate: () => 'php artisan migrate --force',
+      'migrate-refresh': () => 'php artisan migrate:fresh --force',
+      'migrate-fresh-seed': () => 'php artisan migrate:fresh --seed --force'
     }
 
     if (handlers[action]) {
