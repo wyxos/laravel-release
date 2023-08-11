@@ -77,6 +77,10 @@ export async function deploy({ serverConfig }) {
     }
   }
 
+  info(
+    `Attempting connection to ${sshConfig.host}. Reading key from path ${sshConfig.privateKeyPath}`
+  )
+
   await ssh.connect(sshConfig)
 
   await ssh.execCommand(
