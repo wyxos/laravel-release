@@ -19,6 +19,11 @@ function parseGitDiff(diffOutput) {
   const lines = diffOutput.split('\n')
 
   for (const line of lines) {
+    if (!line.includes('\t')) {
+      console.log('Line without tab character:', line)
+      continue
+    }
+
     const [status, path] = line.split('\t')
 
     if (status === 'D') continue // Skip deleted files
