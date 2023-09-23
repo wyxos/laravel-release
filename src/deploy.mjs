@@ -20,7 +20,6 @@ function parseGitDiff(diffOutput) {
 
   for (const line of lines) {
     if (!line.includes('\t')) {
-      console.log('Line without tab character:', line)
       continue
     }
 
@@ -81,10 +80,6 @@ export async function deploy({ serverConfig }) {
       error(chunk.toString('utf8'))
     }
   }
-
-  info(
-    `Attempting connection to ${sshConfig.host}. Reading key from path ${sshConfig.privateKeyPath}`
-  )
 
   await ssh.connect(sshConfig)
 
