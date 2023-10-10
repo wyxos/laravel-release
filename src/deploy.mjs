@@ -37,7 +37,7 @@ function parseGitDiff(diffOutput) {
       path.endsWith('.json') ||
       path.endsWith('.css')
     ) {
-      if (path.startsWith('resources')) {
+      if (path.startsWith('resources') || path.startsWith('ui')) {
         changes.ui.push(path)
       }
     }
