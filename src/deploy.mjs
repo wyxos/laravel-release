@@ -259,25 +259,32 @@ export async function lint(modifiedFiles, changes) {
     info('Initiating lint process...')
 
     if (changes.frontEnd) {
-      execSync(
-        'eslint --fix ' +
-          modifiedFiles
-            .filter((file) => /\.(js|vue|json)$/.test(file))
-            .join(' '),
-        {
-          stdio: 'inherit'
-        }
-      )
+      execSync('eslint --fix "**/*.{js,vue,json}"', {
+        stdio: 'inherit'
+      })
 
-      execSync(
-        'prettier --write ' +
-          modifiedFiles
-            .filter((file) => /\.(js|vue|json|html)$/.test(file))
-            .join(' '),
-        {
-          stdio: 'inherit'
-        }
-      )
+      execSync('prettier --write "**/*.{js,vue,json,html}"', {
+        stdio: 'inherit'
+      })
+      // execSync(
+      //   'eslint --fix ' +
+      //     modifiedFiles
+      //       .filter((file) => /\.(js|vue|json)$/.test(file))
+      //       .join(' '),
+      //   {
+      //     stdio: 'inherit'
+      //   }
+      // )
+      //
+      // execSync(
+      //   'prettier --write ' +
+      //     modifiedFiles
+      //       .filter((file) => /\.(js|vue|json|html)$/.test(file))
+      //       .join(' '),
+      //   {
+      //     stdio: 'inherit'
+      //   }
+      // )
     }
 
     if (changes.php) {
