@@ -35,7 +35,8 @@ function parseGitDiff(diffOutput) {
       path.endsWith('.vue') ||
       path.endsWith('.js') ||
       path.endsWith('.json') ||
-      path.endsWith('.css')
+      path.endsWith('.css') ||
+      path.endsWith('.scss')
     ) {
       if (path.startsWith('resources') || path.startsWith('ui')) {
         changes.ui.push(path)

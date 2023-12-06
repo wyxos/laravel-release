@@ -106,7 +106,7 @@ export async function checkForChanges(serverConfig) {
       composer: modifiedFiles.includes('composer.json'),
       packageJson: modifiedFiles.includes('package.json'),
       frontEnd: modifiedFiles.some((file) =>
-        /^(resources|ui)\/.+(\.js|\.vue|\.json)$/.test(file)
+        /^(resources|ui)\/.+(\.js|\.vue|scss|css\.json)$/.test(file)
       )
     }
   }
