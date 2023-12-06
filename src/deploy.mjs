@@ -295,9 +295,15 @@ export async function lint(modifiedFiles, changes) {
       info('linting php files ' + phpFiles)
 
       if (phpFiles.length) {
-        execSync('prettier --config .prettierrc.php.json --write ' + phpFiles, {
-          stdio: 'inherit'
-        })
+        execSync(
+          'prettier--config .prettierrc.php.json --write  "**/*.{php}"',
+          {
+            stdio: 'inherit'
+          }
+        )
+        // execSync('prettier --config .prettierrc.php.json --write ' + phpFiles, {
+        //   stdio: 'inherit'
+        // })
       }
     }
 
