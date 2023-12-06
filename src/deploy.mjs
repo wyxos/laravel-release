@@ -296,7 +296,7 @@ export async function lint(modifiedFiles, changes) {
 
       if (phpFiles.length) {
         execSync(
-          'prettier --config .prettierrc.php.json --write  "**/*.{php}"',
+          'prettier --config .prettierrc.php.json **/*.php --write --ignore-unknown',
           {
             stdio: 'inherit'
           }
